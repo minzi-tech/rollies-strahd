@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Grimoire — Curse of Strahd Rollies</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#13100d;
+  --bg2:#1a1612;
+  --bg3:#221c16;
+  --bg4:#2e251c;
+  --ink:#e8d9b8;
+  --ink2:#c4a96a;
+  --ink3:#8a7250;
+  --ink4:#5a4830;
+  --gold:#c9a227;
+  --gold2:#e8c547;
+  --blood:#7a1515;
+  --blood2:#a02020;
+  --mist:#3d5068;
+  --border:#3a2e1e;
+  --border2:#5a4228;
+  --border3:#7a5c38;
+  --radius:4px;
+  --shadow:0 2px 12px rgba(0,0,0,0.6);
+}
+body{background:var(--bg);color:var(--ink);font-family:'IM Fell English',Georgia,serif;min-height:100vh;line-height:1.5}
+/* Subtle ruled-paper lines */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(58,46,30,0.15) 27px,rgba(58,46,30,0.15) 28px);pointer-events:none;z-index:0}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:0;padding:0 1rem}
+.nav-brand{font-family:'UnifrakturMaguntia',cursive;font-size:1.5rem;color:var(--gold2);padding:0.6rem 1rem 0.6rem 0;border-right:1px solid var(--border2);margin-right:0.5rem;white-space:nowrap;text-shadow:0 0 20px rgba(201,162,39,0.2)}
+.nav-tabs{display:flex;flex:1;overflow-x:auto}
+.tab-btn{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.85rem 0.9rem;color:var(--ink3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color 0.2s,border-color 0.2s}
+.tab-btn:hover{color:var(--ink2)}
+.tab-btn.active{color:var(--gold2);border-bottom-color:var(--gold)}
+.nav-session-count{font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--ink3);padding:0.5rem 0.75rem;border-left:1px solid var(--border2);margin-left:auto;white-space:nowrap}
+
+/* ── LAYOUT ── */
+.page{display:none;padding:1.5rem;max-width:1100px;margin:0 auto;position:relative;z-index:1}
+.page.active{display:block}
+
+/* ── HEADERS ── */
+.section-header{margin-bottom:1.25rem}
+.section-title{font-family:'UnifrakturMaguntia',cursive;font-size:2rem;color:var(--gold2);line-height:1}
+.section-sub{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink3);margin-top:0.3rem}
+.divider{display:flex;align-items:center;gap:0.75rem;margin:1rem 0;color:var(--border3);font-size:0.9rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,var(--border2),transparent)}
+
+/* ── CARDS ── */
+.card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:1rem 1.1rem;position:relative}
+.card-gold{border-color:var(--gold)}
+.card-title{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.5rem}
+.card-val{font-family:'Share Tech Mono',monospace;font-size:1.5rem;color:var(--gold2)}
+.card-sub{font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--ink3);margin-top:0.2rem}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.75rem;margin-bottom:1.25rem}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-bottom:1.25rem}
+.grid-awards{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:0.75rem;margin-bottom:1.25rem}
+
+/* ── FORM ELEMENTS ── */
+label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:0.3rem}
+input[type=text],input[type=date],input[type=number],select,textarea{
+  background:var(--bg2);color:var(--ink);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:0.5rem 0.75rem;font-family:'IM Fell English',serif;font-size:0.9rem;width:100%;outline:none;
+  transition:border-color 0.2s}
+input[type=text]:focus,input[type=date]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--gold)}
+input[type=number]{text-align:center}
+select option{background:var(--bg3)}
+.form-row{display:grid;gap:0.75rem;margin-bottom:1rem}
+.form-row-2{grid-template-columns:1fr 1fr}
+.form-row-3{grid-template-columns:1fr 1fr 1fr}
+
+/* ── BUTTONS ── */
+.btn{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.55rem 1.1rem;border-radius:var(--radius);cursor:pointer;transition:all 0.2s;border:1px solid}
+.btn-primary{background:var(--blood);color:var(--ink);border-color:var(--blood2)}
+.btn-primary:hover{background:var(--blood2);border-color:#c03030}
+.btn-ghost{background:transparent;color:var(--ink3);border-color:var(--border2)}
+.btn-ghost:hover{color:var(--ink2);border-color:var(--border3)}
+.btn-gold{background:rgba(201,162,39,0.15);color:var(--gold2);border-color:var(--gold)}
+.btn-gold:hover{background:rgba(201,162,39,0.25)}
+.btn-danger{background:transparent;color:#e07070;border-color:var(--blood)}
+.btn-danger:hover{background:rgba(139,26,26,0.2)}
+.btn-group{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem}
+
+/* ── ROLL ENTRY ── */
+.round-label{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:0.3rem}
+.roll-textarea{font-family:'Share Tech Mono',monospace;font-size:0.95rem;padding:0.45rem 0.65rem;resize:none;height:2.6rem;line-height:1.6;letter-spacing:0.05em;color:var(--gold2) !important}
+.roll-textarea.error{border-color:var(--blood2) !important}
+.roll-preview{font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--ink3);min-height:1.1rem;margin-top:0.2rem;margin-bottom:0.5rem}
+
+/* ── PLAYER ENTRY BLOCK ── */
+.player-block{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;margin-bottom:0.7rem}
+.player-block-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem}
+.player-initial-badge{font-family:'UnifrakturMaguntia',cursive;font-size:1.4rem;color:var(--gold2);width:2.2rem;height:2.2rem;background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.player-block-name{flex:1}
+.player-block-name strong{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.1em;color:var(--ink2);display:block}
+.player-block-name span{font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--ink3)}
+.player-live-mean{font-family:'Share Tech Mono',monospace;font-size:1rem;color:var(--gold);margin-left:auto}
+
+/* ── AWARDS ── */
+.award-card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:0.9rem 1rem;position:relative;overflow:hidden}
+.award-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac,var(--border3))}
+.award-top{display:flex;gap:0.7rem;align-items:flex-start;margin-bottom:0.5rem}
+.award-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px}
+.award-meta{flex:1;min-width:0}
+.award-label{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.1rem}
+.award-winner{font-family:'UnifrakturMaguntia',cursive;font-size:1.4rem;color:var(--aw,var(--gold2));line-height:1.1}
+.award-val{font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--ink3)}
+.award-quip{font-style:italic;font-size:0.77rem;color:var(--ink3);border-top:1px solid var(--border);padding-top:0.45rem;line-height:1.4}
+
+/* ── STANDINGS ── */
+.standings-row{display:flex;align-items:center;gap:0.75rem;padding:0.45rem 0.75rem;margin-bottom:0.3rem;background:var(--bg4);border:1px solid var(--border);border-radius:3px}
+.standings-row.rank1{border-color:var(--gold)}
+.rank-label{font-family:'Cinzel',serif;font-size:0.72rem;color:var(--ink3);width:1.4rem;flex-shrink:0}
+.rank1 .rank-label{color:var(--gold2)}
+.rank-initial{font-family:'UnifrakturMaguntia',cursive;font-size:1.15rem;color:var(--ink2);width:2rem;flex-shrink:0}
+.rank-bar-wrap{flex:1;height:7px;background:var(--bg2);border-radius:2px;overflow:hidden}
+.rank-bar{height:100%;border-radius:2px;transition:width 0.5s ease}
+.rank-stat{font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--ink3);min-width:4.5rem;text-align:right}
+.pip{font-size:0.62rem;padding:1px 5px;border-radius:2px;font-family:'Share Tech Mono',monospace}
+.pip-gold{background:rgba(201,162,39,0.15);color:var(--gold2);border:1px solid rgba(201,162,39,0.35)}
+.pip-blood{background:rgba(139,26,26,0.2);color:#e08080;border:1px solid rgba(160,32,32,0.4)}
+
+/* ── CHARTS ── */
+.chart-wrap{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;position:relative}
+.chart-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.75rem}
+canvas{max-height:260px}
+
+/* ── HEATMAP ── */
+.heatmap-grid{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin-bottom:0.5rem}
+.hm-cell{height:18px;border-radius:2px;background:var(--bg2);transition:opacity 0.2s}
+.hm-cell:hover{opacity:0.8;cursor:default}
+.hm-labels{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--ink4)}
+
+/* ── HISTORY TABLE ── */
+.history-table{width:100%;border-collapse:collapse;font-size:0.82rem}
+.history-table th{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);padding:0.45rem 0.6rem;border-bottom:1px solid var(--border2);text-align:left}
+.history-table td{padding:0.45rem 0.6rem;border-bottom:1px solid var(--border);color:var(--ink2);vertical-align:top}
+.history-table tr:hover td{background:var(--bg4)}
+.history-table .mono{font-family:'Share Tech Mono',monospace;font-size:0.75rem}
+.history-table .nat20{color:var(--gold2);font-weight:bold}
+.history-table .nat1{color:#e07070;font-weight:bold}
+
+/* ── TOGGLE PILLS ── */
+.toggle-group{display:flex;gap:0;margin-bottom:1rem;border-radius:3px;overflow:hidden;border:1px solid var(--border2);width:fit-content}
+.toggle-pill{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.35rem 0.9rem;cursor:pointer;background:var(--bg3);color:var(--ink3);border:none;transition:all 0.2s}
+.toggle-pill.active{background:var(--blood);color:var(--ink)}
+
+/* ── PLAYER SELECT CHIPS ── */
+.player-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem}
+.player-chip{font-family:'UnifrakturMaguntia',cursive;font-size:1.1rem;padding:0.2rem 0.6rem;border-radius:3px;cursor:pointer;background:var(--bg4);border:1px solid var(--border2);color:var(--ink3);transition:all 0.2s}
+.player-chip.active{background:rgba(201,162,39,0.15);border-color:var(--gold);color:var(--gold2)}
+
+/* ── EDIT MODE ── */
+.edit-session-card{background:var(--bg3);border:1px solid var(--gold);border-radius:var(--radius);padding:1rem;margin-bottom:0.75rem}
+.edit-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem}
+
+/* ── NOTIFICATIONS ── */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--gold);border-radius:var(--radius);padding:0.6rem 1rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;color:var(--gold2);z-index:999;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;max-width:300px}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--ink3)}
+.empty-state .big-icon{font-size:3rem;margin-bottom:1rem;display:block}
+.empty-state p{font-style:italic;font-size:0.9rem;margin-bottom:1rem}
+
+/* ── MISC ── */
+.text-muted{color:var(--ink3);font-style:italic;font-size:0.85rem}
+.deep-readout-goth{font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:var(--ink3);text-align:right;line-height:1.6;min-width:140px}
+.deep-readout-goth b{color:var(--gold2);font-weight:normal}
+.deep-readout-goth .hot{color:#e0a030}
+.deep-readout-goth .cold{color:#7fb0d0}
+.btn-ghost.active-toggle{background:var(--gold)!important;color:#1a1206!important;border-color:var(--gold2)!important}
+.text-gold{color:var(--gold2)}
+.text-blood{color:#e07070}
+.mono{font-family:'Share Tech Mono',monospace}
+hr.gothic{border:none;border-top:1px solid var(--border2);margin:1.25rem 0}
+.footer-quip{text-align:center;font-style:italic;font-size:0.77rem;color:var(--ink4);margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+/* ── VISIBILITY TOGGLES ── */
+.visibility-row{display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border)}
+.vis-label{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.1em;color:var(--ink2)}
+.vis-toggle{width:36px;height:20px;background:var(--border2);border-radius:10px;position:relative;cursor:pointer;transition:background 0.2s;border:none;flex-shrink:0}
+.vis-toggle.on{background:var(--blood2)}
+.vis-toggle::after{content:'';position:absolute;width:14px;height:14px;background:var(--ink);border-radius:50%;top:3px;left:3px;transition:left 0.2s}
+.vis-toggle.on::after{left:19px}
+
+/* ── CHI-SQUARE ── */
+.chi-card{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:1rem}
+.chi-verdict{font-family:'UnifrakturMaguntia',cursive;font-size:1.5rem;margin:0.4rem 0 0.2rem}
+.chi-verdict.fair{color:var(--gold2)}
+.chi-verdict.suspicious{color:#e07070}
+.chi-stat-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin:0.5rem 0}
+.chi-stat{font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--ink3)}
+.chi-stat span{color:var(--ink2)}
+.chi-bar-wrap{margin:0.75rem 0 0.4rem}
+.chi-bar-track{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-bottom:2px}
+.chi-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+.chi-bar-label{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--ink4)}
+.chi-commentary{font-style:italic;font-size:0.78rem;color:var(--ink3);border-top:1px solid var(--border);padding-top:0.6rem;margin-top:0.6rem;line-height:1.5}
+
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">The Grimoire</div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showTab('entry')">⚔ Entry</button>
+    <button class="tab-btn" onclick="showTab('dashboard')">🏰 Dashboard</button>
+    <button class="tab-btn" onclick="showTab('player')">🧙 Per Player</button>
+    <button class="tab-btn" onclick="showTab('trends')">📜 Trends</button>
+    <button class="tab-btn" onclick="showTab('history')">⚰ History</button>
+  </div>
+  <div class="nav-session-count" id="nav-session-count">0 sessions</div>
+</nav>
+
+<div id="recovery-banner" style="display:none;max-width:1100px;margin:1rem auto 0;padding:0 1.5rem;"></div>
+<div id="export-nudge" style="display:none;max-width:1100px;margin:1rem auto 0;padding:0 1.5rem;"></div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 1: ENTRY
+══════════════════════════════════════════════════ -->
+<div id="tab-entry" class="page active">
+  <div class="section-header">
+    <div class="section-title">Record the Fates</div>
+    <div class="section-sub">Enter a new session of divine misfortune</div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem">
+    <div class="form-row form-row-2">
+      <div>
+        <label>Session Date</label>
+        <input type="date" id="entry-date">
+      </div>
+      <div>
+        <label>Session Notes (optional)</label>
+        <input type="text" id="entry-notes" placeholder="e.g. Battled through Death House…">
+      </div>
+    </div>
+    <div>
+      <label>Players this session</label>
+      <div id="player-selector" class="player-chips"></div>
+    </div>
+    <div id="turn-order-section" style="margin-top:0.75rem;display:none">
+      <label>Turn Order (drag to reorder or use fields)</label>
+      <div id="turn-order-list" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.3rem"></div>
+    </div>
+  </div>
+
+  <div id="entry-players-container"></div>
+
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="saveSession()">⚔ Seal This Session</button>
+    <button class="btn btn-ghost" onclick="clearEntry()">✕ Clear Form</button>
+    <button class="btn btn-gold" onclick="addNewPlayer()">+ New Adventurer</button>
+  </div>
+
+  <hr class="gothic">
+  <div>
+    <div class="card-title">Manage Adventurers</div>
+    <div id="player-management"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 2: DASHBOARD
+══════════════════════════════════════════════════ -->
+<div id="tab-dashboard" class="page">
+  <div class="section-header">
+    <div class="section-title">Decrees of Fate</div>
+    <div class="section-sub">The dark powers have rendered judgment</div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+    <div class="toggle-group" id="dash-scope-toggle">
+      <button class="toggle-pill active" onclick="setDashScope('all',this)">All Sessions</button>
+      <button class="toggle-pill" onclick="setDashScope('session',this)">Single Session</button>
+    </div>
+    <div id="dash-session-pick" style="display:none">
+      <select id="dash-session-select" onchange="renderDashboard()" style="width:auto"></select>
+    </div>
+    <button class="btn btn-gold" id="snark-btn" onclick="conjureSnark()" style="margin-left:auto">🔮 Conjure Fresh Snark</button>
+  </div>
+  <div id="snark-status" class="text-muted" style="margin-bottom:0.75rem;display:none"></div>
+
+  <div id="dash-summary-cards" class="grid-2"></div>
+
+  <div class="divider">⚔</div>
+  <div class="card-title" style="margin-bottom:0.75rem">The Decrees — Awards of Glory and Shame</div>
+  <div id="dash-awards" class="grid-awards"></div>
+
+  <div class="divider">🏰</div>
+  <div class="card-title" style="margin-bottom:0.75rem">The Dark Standings</div>
+  <div id="dash-standings"></div>
+
+  <div class="footer-quip" id="dash-footer"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 3: PER PLAYER
+══════════════════════════════════════════════════ -->
+<div id="tab-player" class="page">
+  <div class="section-header">
+    <div class="section-title">The Adventurer's Chronicle</div>
+    <div class="section-sub">One soul's journey through the mists</div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+    <select id="player-select" onchange="renderPlayerTab()" style="width:auto"></select>
+    <div class="toggle-group" id="player-round-toggle">
+      <button class="toggle-pill active" onclick="setPlayerRound('both',this)">Both Rounds</button>
+      <button class="toggle-pill" onclick="setPlayerRound('r1',this)">Round 1</button>
+      <button class="toggle-pill" onclick="setPlayerRound('r2',this)">Round 2</button>
+    </div>
+  </div>
+
+  <div id="player-summary" class="grid-2" style="margin-bottom:1rem"></div>
+  <div class="chart-wrap">
+    <div class="chart-label">Session Mean Over Time</div>
+    <canvas id="player-trend-chart"></canvas>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-label">Roll Distribution</div>
+    <canvas id="player-dist-chart"></canvas>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-label">Roll Heatmap (position 1–10 in each round)</div>
+    <div id="player-heatmap-r1" class="heatmap-grid"></div>
+    <div class="hm-labels"><span>R1 pos 1</span><span>pos 10</span></div>
+    <div style="height:8px"></div>
+    <div id="player-heatmap-r2" class="heatmap-grid"></div>
+    <div class="hm-labels"><span>R2 pos 1</span><span>pos 10</span></div>
+  </div>
+  <div id="player-chi-square"></div>
+  <div id="player-session-list"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 4: TRENDS
+══════════════════════════════════════════════════ -->
+<div id="tab-trends" class="page">
+  <div class="section-header">
+    <div class="section-title">The Unfolding Prophecy</div>
+    <div class="section-sub">Patterns in the mist — session over session</div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-label">Group Average Per Session</div>
+    <canvas id="trend-group-chart"></canvas>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-label">All Players — Mean Per Session</div>
+    <canvas id="trend-all-chart"></canvas>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-label">Nat 20s vs Nat 1s Per Session</div>
+    <canvas id="trend-crits-chart"></canvas>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-label">Turn Position vs Average Roll (group-wide)</div>
+    <canvas id="trend-position-chart"></canvas>
+  </div>
+
+  <div class="section-header" style="margin-top:2.5rem">
+    <div class="section-title">The Deeper Divination</div>
+    <div class="section-sub">Where superstition meets statistics — intervals, priors, and the honest truth of small samples</div>
+  </div>
+
+  <div class="chart-wrap">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem">
+      <div>
+        <div class="chart-label" style="margin-bottom:0.25rem">Crit &amp; Fumble Rates — Wilson 95% Intervals</div>
+        <div class="text-muted" style="font-size:0.7rem;max-width:520px;line-height:1.5">Each soul's rate of the chosen omen, with Wilson score intervals. The golden line marks the fair-d20 null (5%). When a player's entire interval clears the line, the dice are <em>significantly</em> blessed or cursed — not merely whispered about. Intervals widen honestly for those with fewer trials.</div>
+      </div>
+      <div class="deep-readout-goth" id="wilson-readout-goth"></div>
+    </div>
+    <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+      <button class="btn btn-ghost active-toggle" id="wtog-nat1" style="font-size:0.6rem;padding:0.3rem 0.7rem" onclick="setWilsonModeGoth('nat1',this)">Fumbles (nat 1)</button>
+      <button class="btn btn-ghost" id="wtog-nat20" style="font-size:0.6rem;padding:0.3rem 0.7rem" onclick="setWilsonModeGoth('nat20',this)">Crits (nat 20)</button>
+    </div>
+    <canvas id="trend-wilson-chart"></canvas>
+  </div>
+
+  <div class="chart-wrap">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem">
+      <div>
+        <div class="chart-label" style="margin-bottom:0.25rem">The True Measure — Bayesian Posterior Means</div>
+        <div class="text-muted" style="font-size:0.7rem;max-width:520px;line-height:1.5">Each player's <em>true</em> fortune, drawn as a posterior shrunk toward the group's prior. Filled marks are posterior means; bars are 95% credible intervals; hollow marks show the raw sample mean. The mists pull the under-sampled toward the center — no soul is crowned luckiest on two fevered sessions alone.</div>
+      </div>
+      <div class="deep-readout-goth" id="bayes-readout-goth"></div>
+    </div>
+    <canvas id="trend-bayes-chart"></canvas>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 5: HISTORY / EXPORT
+══════════════════════════════════════════════════ -->
+<div id="tab-history" class="page">
+  <div class="section-header">
+    <div class="section-title">The Tome of Records</div>
+    <div class="section-sub">All sessions, inscribed for eternity</div>
+  </div>
+
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
+    <button class="btn btn-gold" onclick="exportData()">📜 Export JSON</button>
+    <button class="btn btn-ghost" onclick="triggerImport()">⬆ Import JSON</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="btn btn-ghost" onclick="copyExport()">⎘ Copy to Clipboard</button>
+  </div>
+
+  <div id="history-content"></div>
+
+  <hr class="gothic">
+  <div class="card-title" style="margin-bottom:0.75rem">Player Visibility</div>
+  <div class="text-muted" style="margin-bottom:0.75rem">Hidden players are excluded from group charts and awards, but their data is preserved.</div>
+  <div id="visibility-controls"></div>
+
+  <hr class="gothic">
+  <div style="color:#e07070;margin-top:0.5rem">
+    <div class="card-title" style="color:#e07070;margin-bottom:0.5rem">Danger Zone</div>
+    <button class="btn btn-danger" onclick="clearAllData()">🗑 Erase All Records</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA LAYER
+// ══════════════════════════════════════════════════
+const STORAGE_KEY = 'rollies_strahd_v1';
+const BACKUP_PREFIX = 'rollies_strahd_v1_backup_';
+
+function listBackups() {
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(BACKUP_PREFIX)) out.push(k);
+  }
+  const parse = k => { const p = k.slice(BACKUP_PREFIX.length).split('_'); return [Number(p[0])||0, Number(p[1])||0]; };
+  return out.sort((a,b) => { const pa=parse(a), pb=parse(b); return pb[0]-pa[0] || pb[1]-pa[1]; });
+}
+let _backupSeq = 0;
+function writeBackup(d) {
+  try {
+    localStorage.setItem(BACKUP_PREFIX + Date.now() + '_' + (_backupSeq++), JSON.stringify(d));
+    listBackups().slice(5).forEach(k => localStorage.removeItem(k));
+  } catch(e) {}
+}
+function mostRecentBackup() {
+  const b = listBackups();
+  if (!b.length) return null;
+  try { return JSON.parse(localStorage.getItem(b[0])); } catch { return null; }
+}
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData(); }
+  catch { return defaultData(); }
+}
+
+function defaultData() {
+  return {
+    players: [
+      { initial:'B', name:'B', hidden:false },
+      { initial:'M', name:'M', hidden:false },
+      { initial:'K', name:'K', hidden:false },
+      { initial:'Y', name:'Y', hidden:false },
+      { initial:'CT', name:'CT', hidden:false },
+      { initial:'CC', name:'CC', hidden:false }
+    ],
+    sessions: []
+  };
+}
+
+function saveData(d) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+  writeBackup(d);
+}
+
+let STATE = loadData();
+
+// Recovery: if the Grimoire opens with no sessions but a backup survived, offer it.
+let pendingRecovery = null;
+{
+  const stored = localStorage.getItem(STORAGE_KEY);
+  const isEmpty = !STATE.sessions || STATE.sessions.length === 0;
+  const bk = mostRecentBackup();
+  if (isEmpty && bk && bk.sessions && bk.sessions.length > 0) {
+    pendingRecovery = bk;
+  }
+}
+
+// Seed with export if localStorage is empty
+const SEED_DATA = {"sessions":[{"id":"1775696088762","date":"2026-04-08","notes":"","players":[{"initial":"B","turn_position":1,"round1":[5,11,14,14,6,10,5,8,18,9],"round2":[20,4,15,8,14,17,6,4,9,14]},{"initial":"M","turn_position":2,"round1":[19,16,14,20,9,7,11,3,6,8],"round2":[11,2,13,10,20,8,15,13,8,12]},{"initial":"K","turn_position":3,"round1":[5,8,15,12,10,9,4,4,16,1],"round2":[2,2,17,4,8,9,7,11,7,13]},{"initial":"Y","turn_position":4,"round1":[13,14,19,20,17,16,3,13,16,18],"round2":[14,16,6,19,9,17,1,20,20,12]},{"initial":"CT","turn_position":5,"round1":[7,11,10,2,4,2,20,1,19,7],"round2":[1,14,10,7,19,13,12,6,17,6]},{"initial":"CC","turn_position":6,"round1":[10,8,19,7,17,16,14,11,12,18],"round2":[13,16,10,5,18,2,5,3,9,6]}]},{"id":"1777078889591","date":"2026-04-24","notes":"","players":[{"initial":"CT","turn_position":1,"round1":[5,6,11,19,4,1,1,19,12,2],"round2":[4,5,7,18,13,7,17,11,20,19]},{"initial":"CC","turn_position":2,"round1":[6,20,18,8,17,20,18,17,11,9],"round2":[11,1,6,7,6,14,10,13,8,13]},{"initial":"M","turn_position":3,"round1":[14,10,3,9,19,18,16,1,12,16],"round2":[7,7,15,19,17,16,3,6,11,12]},{"initial":"K","turn_position":4,"round1":[18,9,11,6,9,3,18,10,10,5],"round2":[18,16,14,9,8,17,11,6,16,17]},{"initial":"Y","turn_position":5,"round1":[20,19,13,7,16,20,8,19,14,17],"round2":[19,3,15,19,1,20,16,16,3,13]},{"initial":"B","turn_position":6,"round1":[15,12,9,15,13,3,6,19,2,8],"round2":[11,15,5,3,10,19,16,5,3,5]}]},{"id":"1777510200978","date":"2026-04-29","notes":"","players":[{"initial":"M","turn_position":1,"round1":[13,12,10,10,10,9,17,18,11,3],"round2":[19,14,3,12,9,5,19,9,11,10]},{"initial":"K","turn_position":2,"round1":[14,13,4,19,5,18,17,2,7,18],"round2":[20,2,19,14,1,10,8,6,16,7]},{"initial":"CT","turn_position":3,"round1":[13,13,14,13,10,11,18,18,18,14],"round2":[10,8,13,12,19,10,19,13,2,9]},{"initial":"CC","turn_position":4,"round1":[5,1,6,14,3,2,18,4,9,4],"round2":[1,1,10,17,8,20,19,4,20,9]},{"initial":"B","turn_position":5,"round1":[2,1,4,18,6,17,11,14,6,12],"round2":[2,3,4,10,3,15,9,4,14,2]},{"initial":"Y","turn_position":6,"round1":[20,20,19,16,10,13,8,5,14,19],"round2":[15,10,20,14,12,17,12,8,13,12]}]},{"id":"1778719978127","date":"2026-05-13","notes":"","players":[{"initial":"Y","turn_position":1,"round1":[16,16,4,13,12,4,20,1,14,5],"round2":[18,13,17,18,15,14,3,5,17,7]},{"initial":"CT","turn_position":2,"round1":[12,11,13,1,8,10,13,10,5,2],"round2":[2,2,20,20,12,16,7,20,13,17]},{"initial":"CC","turn_position":3,"round1":[17,1,18,10,5,7,2,5,15,15],"round2":[14,14,7,7,3,14,19,3,17,8]},{"initial":"B","turn_position":4,"round1":[15,20,14,6,18,6,19,8,18,9],"round2":[2,17,19,8,15,7,19,11,7,19]},{"initial":"M","turn_position":5,"round1":[6,4,10,6,12,20,1,6,2,6],"round2":[5,19,5,9,6,17,1,16,20,9]},{"initial":"K","turn_position":6,"round1":[7,16,14,9,9,17,11,15,5,5],"round2":[1,5,20,8,10,15,2,14,12,3]}]},{"id":"1779497919305","date":"2026-05-22","notes":"","players":[{"initial":"CT","turn_position":1,"round1":[1,15,12,18,1,1,11,2,4,1],"round2":[9,2,15,18,5,6,8,7,17,14]},{"initial":"Y","turn_position":2,"round1":[19,20,12,7,18,6,13,17,20,10],"round2":[14,20,19,17,19,6,16,14,15,16]},{"initial":"M","turn_position":3,"round1":[16,14,20,6,1,9,11,11,10,3],"round2":[13,6,12,20,3,13,13,2,16,14]},{"initial":"K","turn_position":4,"round1":[20,9,10,19,7,13,19,19,3,18],"round2":[3,19,18,18,7,10,3,5,13,1]},{"initial":"CC","turn_position":5,"round1":[20,10,6,2,5,8,18,6,17,2],"round2":[6,2,19,17,12,20,13,9,13,13]},{"initial":"B","turn_position":6,"round1":[18,14,17,10,6,13,17,15,16,13],"round2":[10,15,5,4,8,18,10,6,15,4]}]},{"id":"1780101838799","date":"2026-05-23","notes":"","players":[{"initial":"M","turn_position":1,"round1":[17,8,7,10,19,14,12,13,5,19],"round2":[9,11,13,10,5,15,7,5,1,7]},{"initial":"K","turn_position":2,"round1":[5,8,9,7,14,17,20,10,7,11],"round2":[15,20,10,9,4,9,20,16,3,20]},{"initial":"B","turn_position":3,"round1":[9,9,5,8,18,14,16,16,17,9],"round2":[14,19,1,9,15,10,3,7,19,2]},{"initial":"CT","turn_position":4,"round1":[13,16,4,15,16,9,4,10,14,8],"round2":[19,20,16,13,14,18,6,14,9,15]},{"initial":"CC","turn_position":5,"round1":[20,2,7,19,15,9,8,18,15,14],"round2":[7,18,15,14,13,13,16,5,7,15]},{"initial":"Y","turn_position":6,"round1":[19,20,15,15,5,16,13,20,3,12],"round2":[11,13,10,1,20,18,15,14,13,18]}]},{"id":"1781312855998","date":"2026-06-12","notes":"","players":[{"initial":"M","turn_position":1,"round1":[7,10,13,13,14,8,6,16,19,10],"round2":[6,17,18,18,17,17,3,9,7,7]},{"initial":"K","turn_position":2,"round1":[1,14,5,12,20,14,16,15,12,9],"round2":[14,19,2,3,19,16,3,19,17,17]},{"initial":"Y","turn_position":3,"round1":[12,19,17,14,9,20,19,3,14,20],"round2":[20,18,6,6,17,15,1,20,8,18]},{"initial":"CT","turn_position":4,"round1":[7,2,19,7,13,13,9,7,18,16],"round2":[18,14,18,10,11,16,4,19,12,3]},{"initial":"CC","turn_position":5,"round1":[17,9,1,6,20,17,8,6,14,1],"round2":[10,11,5,7,17,1,4,19,9,15]},{"initial":"B","turn_position":6,"round1":[13,10,14,10,15,5,14,20,17,13],"round2":[6,14,2,16,12,14,13,9,6,16]}],"created":"2026-06-13T01:07:35.998Z"},{"id":"1782520789284","date":"2026-06-26","notes":"","players":[{"initial":"K","turn_position":1,"round1":[16,3,7,1,13,19,16,4,8,17],"round2":[17,11,20,7,20,5,15,2,5,8]},{"initial":"Y","turn_position":2,"round1":[14,19,8,14,11,11,5,20,8,17],"round2":[1,18,17,16,13,8,8,13,20,12]},{"initial":"CT","turn_position":3,"round1":[19,9,20,4,8,7,9,9,11,15],"round2":[1,19,8,10,7,13,7,19,3,18]},{"initial":"CC","turn_position":4,"round1":[14,19,11,4,12,8,14,6,13,1],"round2":[1,15,15,6,15,5,3,3,13,7]},{"initial":"B","turn_position":5,"round1":[7,3,7,13,17,11,17,20,17,15],"round2":[2,5,3,3,17,3,7,8,1,9]},{"initial":"M","turn_position":6,"round1":[12,11,5,15,3,14,4,19,3,4],"round2":[7,5,4,6,10,14,2,19,4,3]}],"created":"2026-06-27T00:39:49.284Z"},{"id":"1783126555778","date":"2026-07-03","notes":"","players":[{"initial":"B","turn_position":1,"round1":[20,7,9,19,14,9,20,9,4,3],"round2":[15,2,2,5,5,10,7,20,13,2]},{"initial":"CT","turn_position":2,"round1":[18,20,2,20,8,13,14,16,8,9],"round2":[17,19,14,7,6,4,4,3,17,4]},{"initial":"M","turn_position":3,"round1":[15,10,18,19,1,18,13,19,14,9],"round2":[17,14,11,13,8,17,12,18,1,2]},{"initial":"CC","turn_position":4,"round1":[14,13,14,8,15,11,9,14,19,3],"round2":[10,12,10,5,2,8,14,8,12,19]},{"initial":"K","turn_position":5,"round1":[2,7,14,6,18,4,4,20,8,8],"round2":[19,5,4,18,17,2,9,17,2,15]},{"initial":"Y","turn_position":6,"round1":[2,15,12,1,4,11,10,6,20,1],"round2":[1,16,8,20,4,19,18,11,15,7]}],"created":"2026-07-04T00:55:55.778Z"}]};
+
+if (STATE.sessions.length === 0 && !pendingRecovery) {
+  STATE.sessions = SEED_DATA.sessions;
+  saveData(STATE);
+}
+
+// ── Data-loss protection: recovery banner + export nudge ──
+const EXPORT_META_KEY = 'rollies_strahd_v1_exportmeta';
+const EXPORT_NUDGE_EVERY = 5;
+
+function checkRecovery() {
+  const el = document.getElementById('recovery-banner');
+  if (!el || !pendingRecovery) return;
+  const n = pendingRecovery.sessions.length;
+  const dates = pendingRecovery.sessions.map(s=>s.date).sort();
+  const range = n ? `${dates[0]} → ${dates[n-1]}` : '';
+  el.innerHTML = `<div style="background:rgba(201,162,39,0.10);border:1px solid var(--gold);border-radius:var(--radius);padding:0.85rem 1.1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+    <div style="flex:1;min-width:220px;font-family:'IM Fell English',serif;font-size:0.9rem;color:var(--ink)">🕯️ <strong style="color:var(--gold2)">The mists preserved a copy.</strong> The Grimoire opened empty, but a backup holds <strong style="color:var(--gold2)">${n} session${n!==1?'s':''}</strong> (${range}). Restore it from the shadows?</div>
+    <div style="display:flex;gap:0.5rem">
+      <button class="btn btn-gold" onclick="doRecover()">Restore ${n} session${n!==1?'s':''}</button>
+      <button class="btn btn-ghost" onclick="dismissRecovery()">Begin anew</button>
+    </div>
+  </div>`;
+  el.style.display = '';
+}
+function doRecover() {
+  if (!pendingRecovery) return;
+  STATE.sessions = pendingRecovery.sessions;
+  if (pendingRecovery.players) STATE.players = pendingRecovery.players;
+  saveData(STATE);
+  pendingRecovery = null;
+  document.getElementById('recovery-banner').style.display = 'none';
+  updateNavCount();
+  renderEntry();
+  toast('The mists yield. Your records return from the dark.');
+}
+function dismissRecovery() {
+  pendingRecovery = null;
+  document.getElementById('recovery-banner').style.display = 'none';
+  toast('A blank page. The backup remains, should you reconsider (reload to summon it).');
+}
+
+function sessionsSinceExport() {
+  let meta;
+  try { meta = JSON.parse(localStorage.getItem(EXPORT_META_KEY)) || {}; } catch { meta = {}; }
+  return STATE.sessions.length - (meta.lastExportCount || 0);
+}
+function markExported() {
+  try { localStorage.setItem(EXPORT_META_KEY, JSON.stringify({ lastExportCount: STATE.sessions.length, at: Date.now() })); } catch(e){}
+  checkExportNudge();
+}
+function checkExportNudge() {
+  const el = document.getElementById('export-nudge');
+  if (!el) return;
+  const since = sessionsSinceExport();
+  if (since >= EXPORT_NUDGE_EVERY) {
+    el.innerHTML = `<div style="background:rgba(122,21,21,0.15);border:1px solid var(--blood2);border-radius:var(--radius);padding:0.85rem 1.1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px;font-family:'IM Fell English',serif;font-size:0.9rem;color:var(--ink)">⚰️ <strong style="color:#e08080">${since} sessions</strong> inscribed since your last parchment backup. The mists have claimed records before. Transcribe a copy to be safe.</div>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn btn-gold" onclick="exportData(); markExported();">Export to parchment</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('export-nudge').style.display='none'">Not yet</button>
+      </div>
+    </div>`;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// STATS HELPERS
+// ══════════════════════════════════════════════════
+const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+const cnt = (arr,v) => arr.filter(x=>x===v).length;
+const flat = p => [...p.round1, ...p.round2];
+
+function visiblePlayers() {
+  return STATE.players.filter(p=>!p.hidden).map(p=>p.initial);
+}
+
+function playerColor(initial) {
+  const colors = {B:'#c9a227',M:'#c0392b',K:'#534ab7',Y:'#1d9e75',CT:'#d85a30',CC:'#4a90d9'};
+  return colors[initial] || '#8a7250';
+}
+
+function computeAllStats(sessions) {
+  const vis = visiblePlayers();
+  const players = {};
+  for (const s of sessions) {
+    for (const p of s.players) {
+      if (!vis.includes(p.initial)) continue;
+      const all = flat(p);
+      if (!players[p.initial]) players[p.initial] = {initial:p.initial, means:[], nat20s:0, nat1s:0, r1means:[], r2means:[], sessions:0, turns:[]};
+      const ps = players[p.initial];
+      ps.means.push(avg(all));
+      ps.nat20s += cnt(all,20);
+      ps.nat1s += cnt(all,1);
+      ps.r1means.push(avg(p.round1));
+      ps.r2means.push(avg(p.round2));
+      ps.sessions++;
+      ps.turns.push(p.turn_position);
+    }
+  }
+  return Object.values(players).map(p=>({
+    ...p,
+    overallMean: avg(p.means),
+    r1mean: avg(p.r1means),
+    r2mean: avg(p.r2means),
+    avgTurn: avg(p.turns),
+    variance: p.means.length > 1 ? p.means.reduce((s,x)=>s+(x-avg(p.means))**2,0)/p.means.length : 0
+  }));
+}
+
+function computeSessionStats(session) {
+  const vis = visiblePlayers();
+  return session.players
+    .filter(p=>vis.includes(p.initial))
+    .map(p => {
+      const all = flat(p);
+      return { initial:p.initial, turn:p.turn_position, mean:avg(all), r1mean:avg(p.round1), r2mean:avg(p.round2), nat20s:cnt(all,20), nat1s:cnt(all,1) };
+    });
+}
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+let currentTab = 'entry';
+
+function showTab(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{ if(b.getAttribute('onclick').includes("'"+name+"'")) b.classList.add('active'); });
+  currentTab = name;
+  if (name==='entry') renderEntry();
+  if (name==='dashboard') renderDashboard();
+  if (name==='player') renderPlayerTab();
+  if (name==='trends') renderTrends();
+  if (name==='history') renderHistory();
+  updateNavCount();
+}
+
+function updateNavCount() {
+  document.getElementById('nav-session-count').textContent = STATE.sessions.length + ' session' + (STATE.sessions.length!==1?'s':'');
+}
+
+// ══════════════════════════════════════════════════
+// ENTRY TAB
+// ══════════════════════════════════════════════════
+let selectedPlayers = [];
+let playerOrder = [];
+// In-memory buffer of roll text keyed by initial, so re-rendering the entry
+// form (on reorder or player toggle) never loses what's already been typed.
+let entryBuffer = {};
+
+function snapshotEntryInputs() {
+  playerOrder.forEach(init => {
+    const r1 = document.getElementById(`r1-${init}`);
+    const r2 = document.getElementById(`r2-${init}`);
+    if (r1 || r2) {
+      entryBuffer[init] = {
+        r1: r1 ? r1.value : (entryBuffer[init]?.r1 || ''),
+        r2: r2 ? r2.value : (entryBuffer[init]?.r2 || '')
+      };
+    }
+  });
+}
+
+function renderEntry() {
+  // Set today's date
+  if (!document.getElementById('entry-date').value) {
+    document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
+  }
+
+  // Player selector chips
+  const chips = document.getElementById('player-selector');
+  chips.innerHTML = STATE.players.map(p =>
+    `<div class="player-chip ${selectedPlayers.includes(p.initial)?'active':''}" onclick="togglePlayerEntry('${p.initial}')">${p.initial}</div>`
+  ).join('');
+
+  renderTurnOrderUI();
+  renderPlayerInputs();
+  renderPlayerManagement();
+}
+
+function togglePlayerEntry(initial) {
+  snapshotEntryInputs();
+  if (selectedPlayers.includes(initial)) {
+    selectedPlayers = selectedPlayers.filter(x=>x!==initial);
+    playerOrder = playerOrder.filter(x=>x!==initial);
+    delete entryBuffer[initial];
+  } else {
+    selectedPlayers.push(initial);
+    playerOrder.push(initial);
+  }
+  renderEntry();
+}
+
+function renderTurnOrderUI() {
+  const section = document.getElementById('turn-order-section');
+  const list = document.getElementById('turn-order-list');
+  if (selectedPlayers.length === 0) { section.style.display='none'; return; }
+  section.style.display='block';
+  list.innerHTML = playerOrder.map((init,i) =>
+    `<div style="display:flex;align-items:center;gap:0.4rem">
+      <span style="font-family:'Cinzel',serif;font-size:0.65rem;color:var(--ink3)">${i+1}.</span>
+      <span style="font-family:'UnifrakturMaguntia',cursive;font-size:1.1rem;color:var(--gold2);padding:0.2rem 0.5rem;background:var(--bg4);border:1px solid var(--border2);border-radius:3px">${init}</span>
+      ${i>0?`<button onclick="moveOrder('${init}',-1)" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:0.8rem">↑</button>`:''}
+      ${i<playerOrder.length-1?`<button onclick="moveOrder('${init}',1)" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:0.8rem">↓</button>`:''}
+    </div>`
+  ).join('');
+}
+
+function moveOrder(initial, dir) {
+  const i = playerOrder.indexOf(initial);
+  const j = i + dir;
+  if (j<0||j>=playerOrder.length) return;
+  snapshotEntryInputs();
+  [playerOrder[i],playerOrder[j]]=[playerOrder[j],playerOrder[i]];
+  renderEntry();
+}
+
+function parseRollText(text) {
+  return text.trim().split(/[\s,]+/).map(v=>parseInt(v)).filter(v=>!isNaN(v)&&v>=1&&v<=20);
+}
+
+function renderPlayerInputs() {
+  const container = document.getElementById('entry-players-container');
+  if (playerOrder.length === 0) { container.innerHTML=''; return; }
+
+  container.innerHTML = playerOrder.map((init, idx) => {
+    const player = STATE.players.find(p=>p.initial===init);
+    const name = player ? player.name : init;
+    const buf = entryBuffer[init] || {r1:'',r2:''};
+    const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div class="player-block" id="pb-${init}">
+      <div class="player-block-header">
+        <div class="player-initial-badge">${init}</div>
+        <div class="player-block-name">
+          <strong>${name}</strong>
+          <span>Turn position ${idx+1}</span>
+        </div>
+        <div class="player-live-mean" id="live-mean-${init}">—</div>
+      </div>
+      <div class="round-label">Round 1 — space or comma separated (10 rolls)</div>
+      <textarea class="roll-textarea" id="r1-${init}" placeholder="e.g. 14 7 20 3 11 8 19 5 12 16" oninput="updateLiveMean('${init}')">${esc(buf.r1)}</textarea>
+      <div class="roll-preview" id="r1-prev-${init}"></div>
+      <div class="round-label">Round 2 — space or comma separated (10 rolls)</div>
+      <textarea class="roll-textarea" id="r2-${init}" placeholder="e.g. 1 9 17 4 20 6 13 11 8 15" oninput="updateLiveMean('${init}')">${esc(buf.r2)}</textarea>
+      <div class="roll-preview" id="r2-prev-${init}"></div>
+    </div>`;
+  }).join('');
+
+  // Refresh previews / live means for any restored values.
+  playerOrder.forEach(init => updateLiveMean(init));
+}
+
+function updateLiveMean(init) {
+  const r1raw = document.getElementById(`r1-${init}`)?.value || '';
+  const r2raw = document.getElementById(`r2-${init}`)?.value || '';
+  const r1 = parseRollText(r1raw);
+  const r2 = parseRollText(r2raw);
+  const all = [...r1,...r2];
+
+  const r1el = document.getElementById(`r1-${init}`);
+  const r2el = document.getElementById(`r2-${init}`);
+  if (r1el) r1el.classList.toggle('error', r1raw.trim()!=='' && r1.length!==10);
+  if (r2el) r2el.classList.toggle('error', r2raw.trim()!=='' && r2.length!==10);
+
+  const r1prev = document.getElementById(`r1-prev-${init}`);
+  const r2prev = document.getElementById(`r2-prev-${init}`);
+  if (r1prev) r1prev.textContent = r1.length>0 ? `${r1.length}/10 rolls · avg ${avg(r1).toFixed(2)} · 20s: ${cnt(r1,20)} · 1s: ${cnt(r1,1)}` : '';
+  if (r2prev) r2prev.textContent = r2.length>0 ? `${r2.length}/10 rolls · avg ${avg(r2).toFixed(2)} · 20s: ${cnt(r2,20)} · 1s: ${cnt(r2,1)}` : '';
+
+  const el = document.getElementById(`live-mean-${init}`);
+  if (el && all.length > 0) el.textContent = avg(all).toFixed(2);
+  else if (el) el.textContent = '—';
+
+  entryBuffer[init] = { r1: r1raw, r2: r2raw };
+}
+
+function saveSession() {
+  const date = document.getElementById('entry-date').value;
+  const notes = document.getElementById('entry-notes').value;
+  if (!date) { toast('A date must be chosen — the mists do not keep calendars.'); return; }
+  if (playerOrder.length === 0) { toast('Select at least one adventurer.'); return; }
+
+  const players = [];
+  for (let idx=0; idx<playerOrder.length; idx++) {
+    const init = playerOrder[idx];
+    const r1 = parseRollText(document.getElementById(`r1-${init}`)?.value || '');
+    const r2 = parseRollText(document.getElementById(`r2-${init}`)?.value || '');
+    if (r1.length !== 10 || r2.length !== 10) {
+      toast(`${init} needs exactly 10 rolls per round. Check the highlighted fields.`); return;
+    }
+    players.push({ initial:init, turn_position:idx+1, round1:r1, round2:r2 });
+  }
+
+  const session = { id: Date.now().toString(), date, notes, players, created: new Date().toISOString() };
+  STATE.sessions.push(session);
+  saveData(STATE);
+
+  selectedPlayers = [];
+  playerOrder = [];
+  entryBuffer = {};
+  document.getElementById('entry-date').value = '';
+  document.getElementById('entry-notes').value = '';
+  renderEntry();
+  updateNavCount();
+  toast('Session sealed in the Grimoire. The dark powers have taken note.');
+  checkExportNudge();
+}
+
+function clearEntry() {
+  selectedPlayers = [];
+  playerOrder = [];
+  entryBuffer = {};
+  document.getElementById('entry-date').value = '';
+  document.getElementById('entry-notes').value = '';
+  renderEntry();
+}
+
+function addNewPlayer() {
+  const initial = prompt('Enter player initial(s) (e.g. "R" or "DM"):');
+  if (!initial || !initial.trim()) return;
+  const init = initial.trim().toUpperCase();
+  if (STATE.players.find(p=>p.initial===init)) { toast('That adventurer already walks these lands.'); return; }
+  STATE.players.push({ initial:init, name:init, hidden:false });
+  saveData(STATE);
+  renderEntry();
+  toast(`${init} joins the party. Strahd is already disappointed.`);
+}
+
+function renderPlayerManagement() {
+  const el = document.getElementById('player-management');
+  el.innerHTML = STATE.players.map(p =>
+    `<div class="visibility-row">
+      <span class="vis-label">${p.initial}</span>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="btn btn-ghost" style="padding:0.25rem 0.6rem;font-size:0.6rem" onclick="renamePlayer('${p.initial}')">Rename</button>
+        <button class="btn btn-danger" style="padding:0.25rem 0.6rem;font-size:0.6rem" onclick="removePlayer('${p.initial}')">Remove</button>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function renamePlayer(initial) {
+  const name = prompt(`New name/label for ${initial}:`);
+  if (!name) return;
+  const p = STATE.players.find(x=>x.initial===initial);
+  if (p) { p.name = name.trim(); saveData(STATE); renderEntry(); }
+}
+
+function removePlayer(initial) {
+  if (!confirm(`Remove ${initial} from the roster? (Session data is preserved.)`)) return;
+  STATE.players = STATE.players.filter(p=>p.initial!==initial);
+  saveData(STATE);
+  renderEntry();
+  toast(`${initial} has fled Barovia.`);
+}
+
+// ══════════════════════════════════════════════════
+// DASHBOARD TAB
+// ══════════════════════════════════════════════════
+let dashScope = 'all';
+
+function setDashScope(scope, btn) {
+  dashScope = scope;
+  document.querySelectorAll('#dash-scope-toggle .toggle-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dash-session-pick').style.display = scope==='session'?'':'none';
+  renderDashboard();
+}
+
+function populateDashSessionSelect() {
+  const sel = document.getElementById('dash-session-select');
+  sel.innerHTML = STATE.sessions.map((s,i)=>`<option value="${s.id}">Session ${i+1} — ${s.date}</option>`).join('');
+}
+
+function renderDashboard() {
+  if (STATE.sessions.length === 0) {
+    document.getElementById('dash-summary-cards').innerHTML = '<div class="empty-state"><span class="big-icon">🏰</span><p>No sessions recorded yet. The mists await your first entry.</p></div>';
+    document.getElementById('dash-awards').innerHTML='';
+    document.getElementById('dash-standings').innerHTML='';
+    return;
+  }
+  populateDashSessionSelect();
+  let sessions = STATE.sessions;
+  let stats, quips;
+  if (dashScope === 'session') {
+    const id = document.getElementById('dash-session-select').value;
+    const s = STATE.sessions.find(x=>x.id===id) || STATE.sessions[STATE.sessions.length-1];
+    sessions = [s];
+    stats = computeSessionStats(s);
+    quips = SESSION_AWARDS;
+  } else {
+    stats = computeAllStats(STATE.sessions);
+    quips = ALL_AWARDS;
+  }
+
+  // Summary cards
+  const totalRolls = sessions.reduce((a,s)=>a+s.players.reduce((b,p)=>b+p.round1.length+p.round2.length,0),0);
+  const allRolls = sessions.flatMap(s=>s.players.flatMap(p=>flat(p)));
+  const totalNat20 = allRolls.filter(x=>x===20).length;
+  const totalNat1 = allRolls.filter(x=>x===1).length;
+  const groupMean = avg(allRolls);
+
+  document.getElementById('dash-summary-cards').innerHTML = `
+    <div class="card"><div class="card-title">Sessions in the Tome</div><div class="card-val">${sessions.length}</div></div>
+    <div class="card"><div class="card-title">Total Dice Cast</div><div class="card-val">${totalRolls}</div></div>
+    <div class="card"><div class="card-title">Group Mean</div><div class="card-val">${groupMean.toFixed(2)}</div><div class="card-sub">across all visible rolls</div></div>
+    <div class="card card-gold"><div class="card-title">Natural Twenties</div><div class="card-val text-gold">${totalNat20}</div><div class="card-sub">${((totalNat20/totalRolls)*100).toFixed(1)}% of rolls — expected 5%</div></div>
+    <div class="card"><div class="card-title">Critical Failures</div><div class="card-val text-blood">${totalNat1}</div><div class="card-sub">${((totalNat1/totalRolls)*100).toFixed(1)}% of rolls — expected 5%</div></div>
+    <div class="card"><div class="card-title">Fate Ratio (20s:1s)</div><div class="card-val">${totalNat1>0?(totalNat20/totalNat1).toFixed(2):'∞'}</div><div class="card-sub">${totalNat20>totalNat1?'Fortune slightly favors the group':'The dark powers win this one'}</div></div>
+  `;
+
+  // Awards
+  const snark = liveSnark[currentScopeKey()];
+  document.getElementById('dash-awards').innerHTML = quips.map(q => {
+    const winner = q.getter([...stats]);
+    if (!winner) return '';
+    const liveQuip = snark && snark.awards && snark.awards[q.name];
+    const quipText = liveQuip || q.quip(winner);
+    return `<div class="award-card" style="--ac:${q.color};--aw:${q.color}">
+      <div class="award-top">
+        <div class="award-icon">${q.icon}</div>
+        <div class="award-meta">
+          <div class="award-label">${q.name}${liveQuip?' <span style="color:var(--gold2);font-size:0.85em" title="freshly conjured">✦</span>':''}</div>
+          <div class="award-winner">${winner.initial}</div>
+          <div class="award-val">${q.value(winner)}</div>
+        </div>
+      </div>
+      <div class="award-quip">${quipText}</div>
+    </div>`;
+  }).join('');
+
+  // Standings
+  const sorted = [...stats].sort((a,b)=>b.overallMean-a.overallMean || b.mean-a.mean);
+  const RAMP = ['#c9a227','#8b7340','#6b4c2a','#4a3a20','#3a2a18','#2e2010'];
+  const ROMAN = ['I','II','III','IV','V','VI','VII','VIII'];
+  document.getElementById('dash-standings').innerHTML = sorted.map((p,i) => {
+    const m = p.mean !== undefined ? p.mean : p.overallMean;
+    return `<div class="standings-row ${i===0?'rank1':''}">
+      <span class="rank-label">${ROMAN[i]||i+1}</span>
+      <span class="rank-initial">${p.initial}</span>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(m/20*100).toFixed(0)}%;background:${RAMP[i]||RAMP[5]}"></div></div>
+      <span class="rank-stat">${m.toFixed(2)} avg</span>
+      <div style="display:flex;gap:0.3rem">
+        <span class="pip pip-gold">${p.nat20s}×20</span>
+        <span class="pip pip-blood">${p.nat1s}×1</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('dash-footer').textContent =
+    (snark && snark.footer) ? snark.footer
+    : FOOTER_QUIPS[Math.floor(Math.random()*FOOTER_QUIPS.length)];
+}
+
+// ══════════════════════════════════════════════════
+// AWARDS DATA
+// ══════════════════════════════════════════════════
+const ALL_AWARDS = [
+  { icon:'🌟', name:"Strahd's Nemesis", color:'#c9a227',
+    getter: ps => [...ps].sort((a,b)=>b.overallMean-a.overallMean)[0],
+    value: p => p.overallMean.toFixed(2)+' overall avg',
+    quip: w => `${w.initial} rolls so well Strahd has started drafting complaint letters to the dice gods. The fog avoids them personally.` },
+  { icon:'💀', name:'Beloved of Misfortune', color:'#a02020',
+    getter: ps => [...ps].sort((a,b)=>b.nat1s-a.nat1s)[0],
+    value: p => p.nat1s+' critical failures',
+    quip: w => `${w.initial} has gifted Strahd ${w.nat1s} natural ones. He sends a fruit basket. You are making his job unconscionably easy.` },
+  { icon:'✨', name:'Touched by the Morninglord', color:'#e8c547',
+    getter: ps => [...ps].sort((a,b)=>b.nat20s-a.nat20s)[0],
+    value: p => p.nat20s+' natural twenties',
+    quip: w => `${w.initial} has rolled ${w.nat20s} nat 20s. Even Strahd\'s advisors are impressed. Please report to the nearest temple for mandatory canonization.` },
+  { icon:'🕯️', name:'The Slow Burn', color:'#c0392b',
+    getter: ps => { const s=[...ps].filter(p=>p.sessions>=2).sort((a,b)=>(b.r2mean-b.r1mean)-(a.r2mean-a.r1mean)); return s[0]||null; },
+    value: p => `R1 ${p.r1mean.toFixed(1)} → R2 ${p.r2mean.toFixed(1)}`,
+    quip: w => `${w.initial} arrives as a nervous peasant and leaves as a problem. The dice warm up with the evening wine. As do the threats.` },
+  { icon:'⚰️', name:'Reliable as the Grave', color:'#5a4228',
+    getter: ps => { const s=[...ps].filter(p=>p.sessions>=2); s.sort((a,b)=>a.variance-b.variance); return s[0]||null; },
+    value: p => `${p.overallMean.toFixed(2)} avg (suspiciously stable)`,
+    quip: w => `${w.initial}'s variance is so low a statistician wept. Whether this is reassuring or sinister, the Vistani are not saying.` },
+  { icon:'🩸', name:'Chaos Incarnate', color:'#8b1a1a',
+    getter: ps => { const s=[...ps].filter(p=>p.sessions>=2); s.sort((a,b)=>b.variance-a.variance); return s[0]||null; },
+    value: p => `variance: ${p.variance.toFixed(1)}`,
+    quip: w => `${w.initial}'s session averages read like a stock market crash report. Genius one night. Embarrassing the next. Even Strahd cannot predict them.` },
+  { icon:'🗡️', name:'Front-Loader', color:'#534ab7',
+    getter: ps => [...ps].sort((a,b)=>(b.r1mean-b.r2mean)-(a.r1mean-a.r2mean))[0],
+    value: p => `R1 ${p.r1mean.toFixed(1)} > R2 ${p.r2mean.toFixed(1)}`,
+    quip: w => `${w.initial} arrives to session with all their luck already spent. Pacing is an art. We believe in them. Cautiously.` },
+  { icon:'🏰', name:'Most Dangerous', color:'#c9a227',
+    getter: ps => [...ps].sort((a,b)=>(b.nat20s-b.nat1s)-(a.nat20s-a.nat1s))[0],
+    value: p => `net: +${p.nat20s-p.nat1s} (${p.nat20s} twenties, ${p.nat1s} ones)`,
+    quip: w => `${w.initial}'s net crit score is the envy of the table. Strahd\'s minions have filed a formal grievance.` }
+];
+
+const SESSION_AWARDS = [
+  { icon:'⚡', name:'Session MVP', color:'#c9a227',
+    getter: ps => [...ps].sort((a,b)=>b.mean-a.mean)[0],
+    value: p => p.mean.toFixed(2)+' session avg',
+    quip: w => `${w.initial} owned this session. ${w.nat20s} nat 20s. The DM is quietly revising the encounter budget.` },
+  { icon:'🪦', name:'Session Scapegoat', color:'#a02020',
+    getter: ps => [...ps].sort((a,b)=>a.mean-b.mean)[0],
+    value: p => p.mean.toFixed(2)+' session avg',
+    quip: w => `${w.initial} posted a ${w.mean.toFixed(1)} average and ${w.nat1s} nat 1s. Strahd has personally requested a follow-up visit.` },
+  { icon:'💥', name:'Most Dramatic', color:'#c0392b',
+    getter: ps => [...ps].sort((a,b)=>(b.nat20s+b.nat1s)-(a.nat20s+a.nat1s))[0],
+    value: p => `${p.nat20s}× nat20, ${p.nat1s}× nat1`,
+    quip: w => `${w.initial} rolled both glory and shame with abandon. The bard is already workshopping a very confusing ballad.` },
+  { icon:'🌅', name:'Late Bloomer', color:'#534ab7',
+    getter: ps => [...ps].sort((a,b)=>(b.r2mean-b.r1mean)-(a.r2mean-a.r1mean))[0],
+    value: p => `R1 ${p.r1mean.toFixed(1)} → R2 ${p.r2mean.toFixed(1)}`,
+    quip: w => `${w.initial} started slow and found the groove. The dice were, apparently, still loading.` },
+  { icon:'🗡️', name:'Out the Gate', color:'#6b4c2a',
+    getter: ps => [...ps].sort((a,b)=>(b.r1mean-b.r2mean)-(a.r1mean-a.r2mean))[0],
+    value: p => `R1 ${p.r1mean.toFixed(1)} > R2 ${p.r2mean.toFixed(1)}`,
+    quip: w => `${w.initial} peaked immediately. The second round exists, for the record.` },
+  { icon:'🩸', name:'Most Fumbles', color:'#8b1a1a',
+    getter: ps => [...ps].sort((a,b)=>b.nat1s-a.nat1s)[0],
+    value: p => `${p.nat1s} critical failures`,
+    quip: w => `${w.initial} rolled ${w.nat1s} nat 1s tonight. A new personal record. Possibly also a new party record. Strahd is taking notes.` },
+  { icon:'✨', name:'Blessed This Night', color:'#e8c547',
+    getter: ps => [...ps].sort((a,b)=>b.nat20s-a.nat20s)[0],
+    value: p => `${p.nat20s} natural twenties`,
+    quip: w => `${w.initial} rolled ${w.nat20s} nat 20s this session. Whatever they ate for dinner, tell the others.` },
+  { icon:'⚰️', name:'Eerie Consistency', color:'#4a5568',
+    getter: ps => [...ps].sort((a,b)=>Math.abs(a.r1mean-a.r2mean)-Math.abs(b.r1mean-b.r2mean))[0],
+    value: p => `round split Δ: ${Math.abs(p.r1mean-p.r2mean).toFixed(1)}`,
+    quip: w => `${w.initial} barely changed between rounds. This kind of consistency in Barovia is frankly suspicious.` }
+];
+
+const FOOTER_QUIPS = [
+  "The dice have spoken. Strahd smiles. That is not good news.",
+  "Every roll is a prayer. Some gods simply do not answer.",
+  "The mists remember all that you have rolled. And judged accordingly.",
+  "Somewhere in Castle Ravenloft, Strahd is reading this and nodding.",
+  "The Vistani warned you. But you rolled anyway.",
+  "Barovia does not grade on a curve.",
+  "Even the Dark Powers keep a tally. It does not favor you.",
+  "The cards never lie. Neither do the dice. You may wish they did."
+];
+
+// ══════════════════════════════════════════════════
+// LIVE SNARK ENGINE (Claude-powered)
+// ══════════════════════════════════════════════════
+// Overrides the static award quips / footer / chi-square commentary with
+// fresh gothic commentary generated from the REAL numbers on demand.
+// Keyed by scope so switching tabs doesn't lose or re-fetch it.
+// Falls back silently to the static quips if the API is unavailable.
+let liveSnark = {};        // { [scopeKey]: { awards:{name:quip}, footer:str, chi:{initial:quip} } }
+let snarkLoading = false;
+
+function currentScopeKey() {
+  if (dashScope === 'session') {
+    const sel = document.getElementById('dash-session-select');
+    return 'session:' + (sel ? sel.value : '');
+  }
+  return 'all:' + STATE.sessions.length;
+}
+
+// Build a compact, numbers-only briefing for the model.
+function buildSnarkBriefing() {
+  let sessions, stats, scopeLabel, awardDefs;
+  if (dashScope === 'session') {
+    const id = document.getElementById('dash-session-select').value;
+    const s = STATE.sessions.find(x=>x.id===id) || STATE.sessions[STATE.sessions.length-1];
+    sessions = [s];
+    stats = computeSessionStats(s);
+    awardDefs = SESSION_AWARDS;
+    scopeLabel = `a single session dated ${s.date}${s.notes?` ("${s.notes}")`:''}`;
+  } else {
+    sessions = STATE.sessions;
+    stats = computeAllStats(STATE.sessions);
+    awardDefs = ALL_AWARDS;
+    scopeLabel = `all ${STATE.sessions.length} sessions combined`;
+  }
+
+  // Which player won each award, with the concrete stat line.
+  const winners = awardDefs.map(q => {
+    const w = q.getter([...stats]);
+    if (!w) return null;
+    return { award: q.name, winner: w.initial, stat: q.value(w) };
+  }).filter(Boolean);
+
+  // Per-player number lines.
+  const playerLines = stats.map(p => {
+    const mean = (p.overallMean!==undefined?p.overallMean:p.mean);
+    return `${p.initial}: mean ${mean.toFixed(2)}, ${p.nat20s} nat20s, ${p.nat1s} nat1s` +
+      (p.r1mean!==undefined&&p.r2mean!==undefined?`, R1 ${p.r1mean.toFixed(1)} vs R2 ${p.r2mean.toFixed(1)}`:'');
+  });
+
+  return { scopeLabel, winners, playerLines,
+           awardNames: awardDefs.map(a=>a.name) };
+}
+
+async function conjureSnark() {
+  if (STATE.sessions.length === 0) { toast('No sessions to mock yet.'); return; }
+  if (snarkLoading) return;
+  snarkLoading = true;
+  const btn = document.getElementById('snark-btn');
+  const status = document.getElementById('snark-status');
+  const oldLabel = btn.textContent;
+  btn.textContent = '🔮 Consulting the Dark Powers…';
+  btn.disabled = true;
+  status.style.display = 'block';
+  status.textContent = 'The mists churn. Fresh judgments are being drawn from the numbers…';
+
+  const brief = buildSnarkBriefing();
+  const scopeKey = currentScopeKey();
+
+  const sys = `You are the malevolent narrating voice of a Curse of Strahd D&D dice-tracking grimoire. You write SHORT, witty, gothic-horror snark about real dice statistics — in the voice of Barovia itself: Strahd, the Vistani, the Dark Powers, the mists. Dry, theatrical, a little cruel, never mean-spirited toward real people. Each quip is 1–2 sentences. Reference the ACTUAL numbers you're given. Vary your imagery — do not reuse the same joke across quips. Never break character. Never mention dice being "fair" in a reassuring way for someone with bad luck; lean into the curse.`;
+
+  const user = `Here are the real dice statistics for ${brief.scopeLabel}.
+
+Per-player numbers:
+${brief.playerLines.join('\n')}
+
+Award winners this scope:
+${brief.winners.map(w=>`- "${w.award}" → ${w.winner} (${w.stat})`).join('\n')}
+
+Write fresh gothic snark. Respond with ONLY a JSON object, no markdown, no preamble, in exactly this shape:
+{
+  "awards": { ${brief.winners.map(w=>`"${w.award}": "one snarky line about ${w.winner} referencing their stat"`).join(', ')} },
+  "footer": "one ominous one-line footer about the whole group's fate"
+}`;
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: sys,
+        messages: [{ role: "user", content: user }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+
+    liveSnark[scopeKey] = {
+      awards: parsed.awards || {},
+      footer: parsed.footer || null
+    };
+    status.textContent = 'The Dark Powers have rendered fresh judgment. ✦';
+    setTimeout(()=>{ status.style.display='none'; }, 4000);
+    renderDashboard();
+    toast('Fresh snark conjured from the living numbers.');
+  } catch (err) {
+    console.error('Snark conjuring failed:', err);
+    status.textContent = 'The mists resisted. Keeping the old judgments for now.';
+    setTimeout(()=>{ status.style.display='none'; }, 4000);
+    toast('The dark powers are unreachable. Static snark remains.');
+  } finally {
+    snarkLoading = false;
+    btn.textContent = oldLabel;
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════════
+// CHI-SQUARE FAIRNESS TEST
+// ══════════════════════════════════════════════════
+// For a fair d20 each face has probability 1/20.
+// We group into 4 bins (1, 2-10, 11-19, 20) for enough expected counts.
+// χ² = Σ (O-E)²/E, df=3, critical values: p=0.05 → 7.815, p=0.01 → 11.345
+function chiSquareTest(rolls) {
+  const n = rolls.length;
+  if (n < 20) return null; // too few for meaningful test
+  const observed = [
+    cnt(rolls, 1),
+    rolls.filter(x=>x>=2&&x<=10).length,
+    rolls.filter(x=>x>=11&&x<=19).length,
+    cnt(rolls, 20)
+  ];
+  const expected = [n/20, 9*n/20, 9*n/20, n/20];
+  const chi2 = observed.reduce((sum,o,i)=>sum+(o-expected[i])**2/expected[i], 0);
+  // p-value approximation via chi2 cdf (df=3) using regularized incomplete gamma
+  // We compute it numerically — good enough for display purposes
+  const p = 1 - chi2cdf(chi2, 3);
+  return { chi2, p, observed, expected, n };
+}
+
+// Regularized lower incomplete gamma P(a,x) via series expansion
+function gammaP(a, x) {
+  if (x < 0) return 0;
+  if (x === 0) return 0;
+  let sum = 1/a, term = 1/a;
+  for (let k=1; k<200; k++) {
+    term *= x/(a+k);
+    sum += term;
+    if (Math.abs(term) < 1e-10) break;
+  }
+  return Math.min(1, sum * Math.exp(-x + a*Math.log(x) - lgamma(a)));
+}
+
+function lgamma(x) {
+  // Stirling approximation
+  const c = [76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=x, tmp=x+5.5; tmp-=(x+0.5)*Math.log(tmp);
+  let ser=1.000000000190015;
+  c.forEach((cv,j)=>ser+=cv/(y+j+1));
+  return -tmp+Math.log(2.5066282746310005*ser/x);
+}
+
+function chi2cdf(x, df) { return gammaP(df/2, x/2); }
+
+function renderChiSquare(init, allRolls) {
+  const el = document.getElementById('player-chi-square');
+  const result = chiSquareTest(allRolls);
+
+  if (!result) {
+    el.innerHTML = `<div class="chi-card"><div class="card-title">⚗ Fairness Inquisition — χ² Test</div><div class="text-muted" style="margin-top:0.4rem">Not enough rolls for a meaningful test (need ≥ 20, have ${allRolls.length}).</div></div>`;
+    return;
+  }
+
+  const { chi2, p, observed, expected, n } = result;
+  const isFair = p > 0.05;
+  const isVeryUnfair = p < 0.01;
+
+  const binLabels = ['Nat 1s','Rolls 2–10','Rolls 11–19','Nat 20s'];
+  const barsHtml = binLabels.map((label,i) => {
+    const maxPct = Math.max(...observed.map((o,j)=>(o/expected[j]-1)));
+    const deviation = ((observed[i]-expected[i])/expected[i]*100);
+    const barPct = Math.min(100, Math.abs(deviation)*2);
+    const barColor = deviation > 0 ? '#c9a22788' : '#a0202088';
+    return `<div style="margin-bottom:0.5rem">
+      <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--ink3);margin-bottom:2px">
+        <span>${label}</span>
+        <span style="color:var(--ink2)">${observed[i]} observed · ${expected[i].toFixed(1)} expected · ${deviation>0?'+':''}${deviation.toFixed(1)}%</span>
+      </div>
+      <div class="chi-bar-track"><div class="chi-bar-fill" style="width:${barPct}%;background:${barColor};border:1px solid ${deviation>0?'#c9a227':'#a02020'}44"></div></div>
+    </div>`;
+  }).join('');
+
+  // Snarky commentary — static fallback, overridden by live if conjured
+  const staticCommentary = (() => {
+    if (isVeryUnfair && observed[0] > expected[0]*1.5) return `The inquisitors are deeply troubled. ${init} rolls natural ones at a rate that defies physics and personal dignity. The dice are either cursed or conspiring.`;
+    if (isVeryUnfair && observed[3] > expected[3]*1.5) return `Statistically improbable. ${init}'s natural twenties occur far above chance. Either the dice favour them, or we need to examine those dice more closely. Very closely.`;
+    if (isVeryUnfair) return `The numbers do not add up. Something is wrong with ${init}'s dice, their luck, or possibly the fabric of reality. The dark powers are filing a formal inquiry.`;
+    if (!isFair && p < 0.03) return `Mildly suspicious. ${init}'s distribution is a little too lopsided to be entirely comfortable. Not damning evidence — but the Vistani are giving those dice a look.`;
+    if (isFair && p > 0.5) return `Impeccably fair. ${init}'s dice roll with the statistical regularity of a machine. Which is either reassuring or unsettling depending on how you feel about machines.`;
+    if (isFair && observed[3] > expected[3]) return `Fair overall, but ${init} lands more nat 20s than expected. The gods smile. Probably. The test says it could be chance. Probably.`;
+    return `${init}'s rolls pass the inquisition. The dice are behaving themselves. For now. One never truly knows in Barovia.`;
+  })();
+  const liveC = liveChi[init];
+  const commentary = liveC || staticCommentary;
+
+  el.innerHTML = `<div class="chi-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap">
+      <div class="card-title">⚗ Fairness Inquisition — χ² Goodness-of-Fit Test</div>
+      <button class="btn btn-gold" style="padding:0.3rem 0.7rem;font-size:0.55rem" onclick="conjureChiVerdict('${init}')" id="chi-conjure-btn">🔮 Conjure Verdict</button>
+    </div>
+    <div class="chi-verdict ${isFair?'fair':'suspicious'}">${isFair ? (p>0.3?'The Dice Are Innocent':'Probably Innocent') : (isVeryUnfair?'The Dice Stand Accused':'Mildly Suspicious')}</div>
+    <div class="chi-stat-row">
+      <div class="chi-stat">χ² = <span>${chi2.toFixed(3)}</span></div>
+      <div class="chi-stat">p = <span>${p < 0.001 ? '< 0.001' : p.toFixed(3)}</span></div>
+      <div class="chi-stat">n = <span>${n} rolls</span></div>
+      <div class="chi-stat">df = <span>3</span></div>
+      <div class="chi-stat" style="color:${isFair?'var(--gold2)':'#e07070'}">${isFair ? 'p > 0.05 · not significant' : isVeryUnfair ? 'p < 0.01 · highly significant' : 'p < 0.05 · significant'}</div>
+    </div>
+    <div style="margin:0.75rem 0 0.25rem;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3)">Observed vs Expected by Bin</div>
+    ${barsHtml}
+    <div style="margin-top:0.5rem;font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--ink4)">
+      Critical values (df=3): p=0.05 → χ²=7.815 · p=0.01 → χ²=11.345 · ${init}'s χ²=${chi2.toFixed(3)} → ${chi2<7.815?'fair':chi2<11.345?'borderline':'significant'}
+    </div>
+    <div class="chi-commentary" id="chi-commentary-text">${commentary}${liveC?' <span style="color:var(--gold2)">✦</span>':''}</div>
+  </div>`;
+}
+
+// Live chi-square verdict cache + conjurer
+let liveChi = {};
+let chiLoading = false;
+
+async function conjureChiVerdict(init) {
+  if (chiLoading) return;
+  const rolls = STATE.sessions.flatMap(s=>s.players.filter(p=>p.initial===init).flatMap(p=>[...p.round1,...p.round2]));
+  const result = chiSquareTest(rolls);
+  if (!result) { toast('Not enough rolls for a verdict.'); return; }
+  chiLoading = true;
+  const btn = document.getElementById('chi-conjure-btn');
+  const txt = document.getElementById('chi-commentary-text');
+  if (btn) { btn.textContent = '🔮 Consulting…'; btn.disabled = true; }
+  if (txt) txt.style.opacity = '0.5';
+
+  const { chi2, p, observed, expected, n } = result;
+  const binLabels = ['Nat 1s (rolled 1)','mid-low 2–10','mid-high 11–19','Nat 20s (rolled 20)'];
+  const bins = binLabels.map((l,i)=>`${l}: ${observed[i]} observed vs ${expected[i].toFixed(1)} expected (${observed[i]>expected[i]?'+':''}${((observed[i]-expected[i])/expected[i]*100).toFixed(0)}%)`).join('; ');
+  const verdict = p>0.05 ? 'passes as fair (not statistically significant)' : p<0.01 ? 'highly significant deviation — very suspicious' : 'significant deviation — suspicious';
+
+  const sys = `You are the malevolent narrating voice of a Curse of Strahd D&D grimoire, delivering a verdict from a chi-square dice-fairness test. Voice: gothic-horror Barovia — Strahd, the Dark Powers, the Vistani, inquisitors, the mists. Dry, theatrical, a touch cruel, never cruel toward the real person. 2–3 sentences. You MUST reference the actual statistics: cite the specific bin that deviates most and what it means (too many 1s = cursed/unlucky, too many 20s = suspiciously blessed, too few crits = eerily average). Explain WHY the dice are or aren't suspicious in-character. Never break character.`;
+  const user = `Player ${init}'s d20 rolls over all sessions, binned for a chi-square goodness-of-fit test against a fair d20:
+${bins}
+Test result: χ²=${chi2.toFixed(2)}, p=${p<0.001?'<0.001':p.toFixed(3)}, n=${n} rolls. Verdict: ${verdict}.
+
+Write the inquisition's verdict as ONLY a JSON object, no markdown: {"verdict": "your 2-3 sentence gothic verdict referencing the specific numbers"}`;
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, system:sys, messages:[{role:"user",content:user}] })
+    });
+    const data = await resp.json();
+    const text = data.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    liveChi[init] = parsed.verdict;
+    renderPlayerTab();
+    toast('The inquisition has rendered its verdict.');
+  } catch(err) {
+    console.error('Chi verdict failed:', err);
+    toast('The inquisitors are unreachable. Static verdict remains.');
+    if (btn) { btn.textContent = '🔮 Conjure Verdict'; btn.disabled = false; }
+    if (txt) txt.style.opacity = '1';
+  } finally {
+    chiLoading = false;
+  }
+}
+
+
+let playerRound = 'both';
+let playerChartTrend = null, playerChartDist = null;
+
+function setPlayerRound(mode, btn) {
+  playerRound = mode;
+  document.querySelectorAll('#player-round-toggle .toggle-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPlayerTab();
+}
+
+function renderPlayerTab() {
+  const sel = document.getElementById('player-select');
+  const allInitials = [...new Set(STATE.sessions.flatMap(s=>s.players.map(p=>p.initial)))].sort();
+  if (sel.innerHTML === '' || sel.options.length !== allInitials.length) {
+    sel.innerHTML = allInitials.map(i=>`<option value="${i}">${i}</option>`).join('');
+  }
+  const init = sel.value || allInitials[0];
+  if (!init) return;
+
+  const sessions = STATE.sessions;
+  const playerSessions = sessions
+    .filter(s=>s.players.some(p=>p.initial===init))
+    .map(s=>({ session:s, p:s.players.find(p=>p.initial===init) }));
+
+  if (playerSessions.length === 0) {
+    document.getElementById('player-summary').innerHTML='<div class="empty-state"><p>No data for this player yet.</p></div>';
+    return;
+  }
+
+  const getRolls = pp => playerRound==='r1' ? pp.round1 : playerRound==='r2' ? pp.round2 : flat(pp);
+  const allRolls = playerSessions.flatMap(({p})=>getRolls(p));
+  const means = playerSessions.map(({p})=>avg(getRolls(p)));
+  const n20 = allRolls.filter(x=>x===20).length;
+  const n1 = allRolls.filter(x=>x===1).length;
+  const overallMean = avg(allRolls);
+  const r1mean = avg(playerSessions.flatMap(({p})=>p.round1));
+  const r2mean = avg(playerSessions.flatMap(({p})=>p.round2));
+
+  document.getElementById('player-summary').innerHTML = `
+    <div class="card"><div class="card-title">Overall Mean</div><div class="card-val">${overallMean.toFixed(2)}</div></div>
+    <div class="card"><div class="card-title">Sessions</div><div class="card-val">${playerSessions.length}</div></div>
+    <div class="card"><div class="card-title">Natural Twenties</div><div class="card-val text-gold">${n20}</div><div class="card-sub">${((n20/allRolls.length)*100).toFixed(1)}% of rolls</div></div>
+    <div class="card"><div class="card-title">Critical Failures</div><div class="card-val text-blood">${n1}</div><div class="card-sub">${((n1/allRolls.length)*100).toFixed(1)}% of rolls</div></div>
+    <div class="card"><div class="card-title">R1 Avg</div><div class="card-val">${r1mean.toFixed(2)}</div></div>
+    <div class="card"><div class="card-title">R2 Avg</div><div class="card-val">${r2mean.toFixed(2)}</div></div>
+  `;
+
+  // Trend chart
+  if (playerChartTrend) playerChartTrend.destroy();
+  const trendCtx = document.getElementById('player-trend-chart').getContext('2d');
+  playerChartTrend = new Chart(trendCtx, {
+    type: 'line',
+    data: {
+      labels: playerSessions.map(({session},i)=>`S${i+1} (${session.date})`),
+      datasets: [{
+        label: init+' mean', data: means.map(m=>+m.toFixed(2)),
+        borderColor: playerColor(init), backgroundColor: playerColor(init)+'33',
+        tension: 0.3, fill: true, pointRadius: 5, pointHoverRadius: 7
+      }]
+    },
+    options: chartOptions()
+  });
+
+  // Distribution
+  const bins = Array.from({length:20},(_,i)=>allRolls.filter(x=>x===i+1).length);
+  if (playerChartDist) playerChartDist.destroy();
+  const distCtx = document.getElementById('player-dist-chart').getContext('2d');
+  playerChartDist = new Chart(distCtx, {
+    type: 'bar',
+    data: {
+      labels: Array.from({length:20},(_,i)=>i+1),
+      datasets: [{
+        label: 'Count', data: bins,
+        backgroundColor: bins.map((_,i)=> i===19?'#c9a227aa': i===0?'#a0202088':'#5a422888'),
+        borderColor: bins.map((_,i)=> i===19?'#c9a227': i===0?'#a02020':'#7a5c38'),
+        borderWidth: 1
+      }]
+    },
+    options: { ...chartOptions(), plugins:{ legend:{display:false} } }
+  });
+
+  // Heatmaps
+  renderHeatmap('player-heatmap-r1', playerSessions.map(({p})=>p.round1));
+  renderHeatmap('player-heatmap-r2', playerSessions.map(({p})=>p.round2));
+
+  // Chi-square test
+  renderChiSquare(init, allRolls);
+
+  // Per-session list
+  document.getElementById('player-session-list').innerHTML = `
+    <div class="card-title" style="margin-bottom:0.5rem">Session-by-Session</div>
+    <table class="history-table"><thead><tr>
+      <th>Session</th><th>Date</th><th>Turn</th><th>R1 Avg</th><th>R2 Avg</th><th>Overall</th><th>20s</th><th>1s</th>
+    </tr></thead><tbody>
+    ${playerSessions.map(({session,p},i)=>{
+      const all=flat(p);
+      return `<tr>
+        <td class="mono">S${i+1}</td>
+        <td class="mono">${session.date}</td>
+        <td class="mono">${p.turn_position}</td>
+        <td class="mono">${avg(p.round1).toFixed(2)}</td>
+        <td class="mono">${avg(p.round2).toFixed(2)}</td>
+        <td class="mono">${avg(all).toFixed(2)}</td>
+        <td class="mono nat20">${cnt(all,20)}</td>
+        <td class="mono nat1">${cnt(all,1)}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
+}
+
+function renderHeatmap(id, rounds) {
+  const el = document.getElementById(id);
+  if (!rounds || rounds.length === 0) { el.innerHTML=''; return; }
+  const positional = Array.from({length:10},(_,i)=>avg(rounds.map(r=>r[i]||0)));
+  const maxVal = Math.max(...positional);
+  el.innerHTML = positional.map((v,i)=>{
+    const intensity = maxVal > 0 ? v/maxVal : 0;
+    const r = Math.round(139 * intensity + 26 * (1-intensity));
+    const g = Math.round(200 * intensity * 0.6);
+    const b = Math.round(50 * (1-intensity));
+    return `<div class="hm-cell" style="background:rgba(${r},${g},${b},${0.3+intensity*0.7})" title="Pos ${i+1}: ${v.toFixed(2)} avg"></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// TRENDS TAB
+// ══════════════════════════════════════════════════
+let trendCharts = {};
+
+function renderTrends() {
+  const sessions = STATE.sessions;
+  if (sessions.length === 0) return;
+  const labels = sessions.map((s,i)=>`S${i+1} (${s.date})`);
+
+  destroyCharts(['trend-group','trend-all','trend-crits','trend-pos','trend-wilson','trend-bayes']);
+
+  // Group avg
+  const groupMeans = sessions.map(s=>avg(s.players.flatMap(p=>flat(p))));
+  trendCharts['trend-group'] = new Chart(document.getElementById('trend-group-chart').getContext('2d'), {
+    type:'line', data:{ labels, datasets:[{ label:'Group Mean', data:groupMeans.map(v=>+v.toFixed(2)), borderColor:'#c9a227', backgroundColor:'#c9a22733', tension:0.3, fill:true, pointRadius:5 }] },
+    options: chartOptions()
+  });
+
+  // All players
+  const allInitials = [...new Set(sessions.flatMap(s=>s.players.map(p=>p.initial)))].filter(i=>visiblePlayers().includes(i));
+  trendCharts['trend-all'] = new Chart(document.getElementById('trend-all-chart').getContext('2d'), {
+    type:'line',
+    data:{ labels, datasets: allInitials.map(init=>({
+      label:init,
+      data: sessions.map(s=>{ const p=s.players.find(x=>x.initial===init); return p?+avg(flat(p)).toFixed(2):null; }),
+      borderColor: playerColor(init), backgroundColor: playerColor(init)+'44',
+      tension:0.3, pointRadius:4, spanGaps:true
+    }))},
+    options: chartOptions()
+  });
+
+  // Crits
+  const nat20s = sessions.map(s=>s.players.flatMap(p=>flat(p)).filter(x=>x===20).length);
+  const nat1s = sessions.map(s=>s.players.flatMap(p=>flat(p)).filter(x=>x===1).length);
+  trendCharts['trend-crits'] = new Chart(document.getElementById('trend-crits-chart').getContext('2d'), {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'Nat 20s', data:nat20s, backgroundColor:'#c9a22788', borderColor:'#c9a227', borderWidth:1 },
+      { label:'Nat 1s', data:nat1s, backgroundColor:'#a0202088', borderColor:'#a02020', borderWidth:1 }
+    ]},
+    options: chartOptions()
+  });
+
+  // Turn position
+  const posData = Array.from({length:6},(_,i)=>{
+    const rolls = sessions.flatMap(s=>s.players.filter(p=>p.turn_position===i+1).flatMap(p=>flat(p)));
+    return rolls.length ? avg(rolls) : null;
+  });
+  trendCharts['trend-pos'] = new Chart(document.getElementById('trend-position-chart').getContext('2d'), {
+    type:'bar',
+    data:{ labels:['Pos 1','Pos 2','Pos 3','Pos 4','Pos 5','Pos 6'],
+      datasets:[{ label:'Avg Roll', data:posData.map(v=>v?+v.toFixed(2):null), backgroundColor:'#5a422888', borderColor:'#7a5c38', borderWidth:1 }] },
+    options: { ...chartOptions(), plugins:{legend:{display:false}} }
+  });
+
+  drawWilsonGoth();
+  drawBayesGoth();
+}
+
+// ── Rigorous stat helpers ──
+function sdGoth(a){ if(a.length<2) return 0; const m=avg(a); return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1)); }
+function wilsonGoth(succ,n,z=1.96){ if(n===0)return{lo:0,hi:1,p:0}; const p=succ/n,z2=z*z,d=1+z2/n; const c=(p+z2/(2*n))/d; const h=(z*Math.sqrt(p*(1-p)/n+z2/(4*n*n)))/d; return{lo:Math.max(0,c-h),hi:Math.min(1,c+h),p}; }
+
+let wilsonModeGoth = 'nat1';
+function setWilsonModeGoth(mode, btn){
+  wilsonModeGoth = mode;
+  document.getElementById('wtog-nat1').classList.toggle('active-toggle', mode==='nat1');
+  document.getElementById('wtog-nat20').classList.toggle('active-toggle', mode==='nat20');
+  drawWilsonGoth();
+}
+
+function drawWilsonGoth(){
+  const sessions = STATE.sessions;
+  const inits = [...new Set(sessions.flatMap(s=>s.players.map(p=>p.initial)))].filter(i=>visiblePlayers().includes(i));
+  const face = wilsonModeGoth==='nat20' ? 20 : 1;
+  const nullP = 0.05;
+  const rows = inits.map(init=>{
+    const r = sessions.flatMap(s=>s.players.filter(p=>p.initial===init).flatMap(p=>flat(p)));
+    const succ = r.filter(x=>x===face).length;
+    const ci = wilsonGoth(succ, r.length);
+    const sig = ci.lo>nullP ? 'high' : ci.hi<nullP ? 'low' : 'ns';
+    return { init, n:r.length, succ, ...ci, sig };
+  });
+
+  const flagged = rows.filter(r=>r.sig!=='ns');
+  const ro = document.getElementById('wilson-readout-goth');
+  if (ro) ro.innerHTML = flagged.length
+    ? flagged.map(r=>`<span class="${r.sig==='high'?'hot':'cold'}">${r.init}</span> ${r.sig==='high'?'cursed':'blessed'} (${(r.p*100).toFixed(1)}%)`).join('<br>')
+    : `null = 5%<br>none significant at 95%`;
+
+  const col = r => r.sig==='high' ? '#c9a227' : r.sig==='low' ? '#7fb0d0' : '#6a5638';
+  destroyCharts(['trend-wilson']);
+  trendCharts['trend-wilson'] = new Chart(document.getElementById('trend-wilson-chart').getContext('2d'), {
+    type:'bar',
+    data:{
+      labels: rows.map(r=>r.init),
+      datasets:[
+        { label:'_lo', data: rows.map(r=>+(r.lo*100).toFixed(2)), backgroundColor:'transparent', stack:'ci', grouped:false, categoryPercentage:0.4, barPercentage:0.6 },
+        { label:'95% CI', data: rows.map(r=>+((r.hi-r.lo)*100).toFixed(2)),
+          backgroundColor: rows.map(r=>col(r)+'44'), borderColor: rows.map(col), borderWidth:1, stack:'ci', grouped:false, categoryPercentage:0.4, barPercentage:0.6 },
+        { type:'scatter', label:'rate', data: rows.map((r,i)=>({x:i,y:+(r.p*100).toFixed(2)})),
+          backgroundColor: rows.map(col), borderColor:'#1a1206', borderWidth:1, pointRadius:5, pointHoverRadius:7 },
+        { type:'line', label:'5% null', data: rows.map(()=>5), borderColor:'rgba(201,162,39,0.8)', borderDash:[6,4], borderWidth:1.5, pointRadius:0 }
+      ]
+    },
+    options: {
+      ...chartOptions(),
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{
+          title: items => rows[items[0].dataIndex]?.init || '',
+          label: item => { const r=rows[item.dataIndex]; if(!r)return''; return [`rate ${(r.p*100).toFixed(2)}% (${r.succ}/${r.n})`, `CI [${(r.lo*100).toFixed(2)}, ${(r.hi*100).toFixed(2)}]%`, r.sig==='ns'?'not sig vs 5%':'SIGNIFICANT vs 5%']; }
+        }}
+      },
+      scales:{ ...chartOptions().scales,
+        x:{ ...chartOptions().scales.x, type:'category', offset:true },
+        y:{ ...chartOptions().scales.y, min:0, suggestedMax: Math.max(12, Math.ceil(Math.max(...rows.map(r=>r.hi*100))+1)) }
+      }
+    }
+  });
+}
+
+function drawBayesGoth(){
+  const sessions = STATE.sessions;
+  const inits = [...new Set(sessions.flatMap(s=>s.players.map(p=>p.initial)))].filter(i=>visiblePlayers().includes(i));
+  const data = inits.map(init=>{
+    const r = sessions.flatMap(s=>s.players.filter(p=>p.initial===init).flatMap(p=>flat(p)));
+    return { init, r, n:r.length, mean:avg(r), sd:sdGoth(r) };
+  }).filter(d=>d.n>0);
+  if (!data.length) return;
+
+  const mu0 = avg(data.flatMap(d=>d.r));
+  const withinVar = avg(data.map(d=>d.sd*d.sd));
+  const pm = data.map(d=>d.mean);
+  const gm = avg(pm);
+  const betweenRaw = pm.length>1 ? pm.reduce((s,m)=>s+(m-gm)**2,0)/(pm.length-1) : 0;
+  const avgN = avg(data.map(d=>d.n));
+  const tau2 = Math.max(0.0001, betweenRaw - withinVar/avgN);
+
+  const rows = data.map(d=>{
+    const dv = withinVar/d.n;
+    const w = tau2/(tau2+dv);
+    const post = w*d.mean + (1-w)*mu0;
+    const postVar = 1/(1/tau2 + 1/dv);
+    const ci = 1.96*Math.sqrt(postVar);
+    return { init:d.init, raw:d.mean, post, lo:post-ci, hi:post+ci, w, n:d.n };
+  }).sort((a,b)=>b.post-a.post);
+
+  const ro = document.getElementById('bayes-readout-goth');
+  if (ro) {
+    const top = rows[0];
+    const shrunk = [...rows].sort((a,b)=>a.w-b.w)[0];
+    ro.innerHTML = `prior μ₀ = <b>${mu0.toFixed(2)}</b><br>τ = ${Math.sqrt(tau2).toFixed(2)}<br>leader <span class="hot">${top.init}</span> (${top.post.toFixed(2)})<br>most shrunk ${shrunk.init} (w=${shrunk.w.toFixed(2)})`;
+  }
+
+  destroyCharts(['trend-bayes']);
+  trendCharts['trend-bayes'] = new Chart(document.getElementById('trend-bayes-chart').getContext('2d'), {
+    type:'scatter',
+    data:{
+      datasets:[
+        ...rows.map((r,i)=>({ label:'_ci'+i, data:[{x:i,y:r.lo},{x:i,y:r.hi}], type:'line', borderColor:'#c9a227', borderWidth:2, pointRadius:0, showLine:true })),
+        { label:'posterior mean', data: rows.map((r,i)=>({x:i,y:+r.post.toFixed(3)})), backgroundColor:'#c9a227', borderColor:'#1a1206', borderWidth:1, pointRadius:6, pointHoverRadius:8 },
+        { label:'raw sample mean', data: rows.map((r,i)=>({x:i,y:+r.raw.toFixed(3)})), backgroundColor:'transparent', borderColor:'#8a7250', borderWidth:1.5, pointRadius:6 },
+        { label:`prior μ₀ (${mu0.toFixed(1)})`, data: rows.map((_,i)=>({x:i,y:+mu0.toFixed(2)})), type:'line', borderColor:'rgba(160,32,32,0.7)', borderDash:[6,4], borderWidth:1.5, pointRadius:0 }
+      ]
+    },
+    options:{
+      ...chartOptions(),
+      plugins:{ legend:{ labels:{ color:'#8a7250', filter:i=>!i.text.startsWith('_'), font:{family:"'Share Tech Mono'",size:10} } },
+        tooltip:{ callbacks:{
+          title: items => rows[Math.round(items[0].parsed.x)]?.init || '',
+          label: item => { const r=rows[Math.round(item.parsed.x)]; if(!r)return''; return [`posterior ${r.post.toFixed(2)} [${r.lo.toFixed(2)}, ${r.hi.toFixed(2)}]`, `raw ${r.raw.toFixed(2)} · n=${r.n} · w=${r.w.toFixed(2)}`]; }
+        }}
+      },
+      scales:{ ...chartOptions().scales,
+        x:{ ...chartOptions().scales.x, min:-0.5, max:rows.length-0.5, ticks:{ color:'#8a7250', font:{family:"'Share Tech Mono'",size:10}, callback:v=>rows[v]?rows[v].init:'' } },
+        y:{ ...chartOptions().scales.y, suggestedMin:Math.floor(Math.min(...rows.map(r=>r.lo))-0.5), suggestedMax:Math.ceil(Math.max(...rows.map(r=>r.hi))+0.5) }
+      }
+    }
+  });
+}
+
+function destroyCharts(keys) {
+  keys.forEach(k=>{ if(trendCharts[k]){ trendCharts[k].destroy(); delete trendCharts[k]; } });
+}
+
+// ══════════════════════════════════════════════════
+// HISTORY TAB
+// ══════════════════════════════════════════════════
+function renderHistory() {
+  const sessions = STATE.sessions;
+  if (sessions.length === 0) {
+    document.getElementById('history-content').innerHTML = '<div class="empty-state"><span class="big-icon">⚰</span><p>No sessions recorded. The tome awaits its first inscription.</p></div>';
+  } else {
+    document.getElementById('history-content').innerHTML = sessions.map((s,si) => `
+      <div class="card" style="margin-bottom:0.75rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+          <div>
+            <div class="card-title">Session ${si+1} — ${s.date}</div>
+            ${s.notes?`<div class="text-muted" style="margin-top:0.2rem">${s.notes}</div>`:''}
+          </div>
+          <div style="display:flex;gap:0.4rem">
+            <button class="btn btn-ghost" style="font-size:0.6rem;padding:0.3rem 0.6rem" onclick="editSession('${s.id}')">Edit</button>
+            <button class="btn btn-danger" style="font-size:0.6rem;padding:0.3rem 0.6rem" onclick="deleteSession('${s.id}')">Delete</button>
+          </div>
+        </div>
+        <table class="history-table"><thead><tr>
+          <th>Player</th><th>Turn</th><th>R1 Avg</th><th>R2 Avg</th><th>Overall</th><th>20s</th><th>1s</th><th>R1 Rolls</th>
+        </tr></thead><tbody>
+        ${s.players.map(p=>{
+          const all=flat(p);
+          return `<tr>
+            <td style="font-family:'UnifrakturMaguntia',cursive;font-size:1.1rem;color:var(--gold2)">${p.initial}</td>
+            <td class="mono">${p.turn_position}</td>
+            <td class="mono">${avg(p.round1).toFixed(2)}</td>
+            <td class="mono">${avg(p.round2).toFixed(2)}</td>
+            <td class="mono">${avg(all).toFixed(2)}</td>
+            <td class="mono nat20">${cnt(all,20)}</td>
+            <td class="mono nat1">${cnt(all,1)}</td>
+            <td class="mono" style="font-size:0.68rem;color:var(--ink3)">${p.round1.join(' · ')}</td>
+          </tr>`;
+        }).join('')}
+        </tbody></table>
+      </div>
+    `).join('');
+  }
+
+  // Visibility controls
+  document.getElementById('visibility-controls').innerHTML = STATE.players.map(p=>`
+    <div class="visibility-row">
+      <span class="vis-label" style="font-family:'UnifrakturMaguntia',cursive;font-size:1.1rem;color:var(--gold2)">${p.initial}</span>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <span style="font-family:'Cinzel',serif;font-size:0.6rem;color:var(--ink3)">${p.hidden?'hidden':'visible'}</span>
+        <button class="vis-toggle ${p.hidden?'':'on'}" onclick="toggleVisibility('${p.initial}')"></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleVisibility(initial) {
+  const p = STATE.players.find(x=>x.initial===initial);
+  if (p) { p.hidden = !p.hidden; saveData(STATE); renderHistory(); }
+}
+
+function deleteSession(id) {
+  if (!confirm('Permanently erase this session from the Grimoire?')) return;
+  STATE.sessions = STATE.sessions.filter(s=>s.id!==id);
+  saveData(STATE);
+  renderHistory();
+  updateNavCount();
+  toast('Session banished. The mists closed over it without a word.');
+}
+
+function editSession(id) {
+  const s = STATE.sessions.find(x=>x.id===id);
+  if (!s) return;
+  const newDate = prompt('Edit date (YYYY-MM-DD):', s.date);
+  if (newDate !== null) s.date = newDate.trim() || s.date;
+  const newNotes = prompt('Edit notes:', s.notes||'');
+  if (newNotes !== null) s.notes = newNotes.trim();
+  saveData(STATE);
+  renderHistory();
+  toast('The record has been amended. The dark powers note the change.');
+}
+
+function exportData() {
+  const json = JSON.stringify({ sessions: STATE.sessions }, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`rollies-strahd-export-${new Date().toISOString().split('T')[0]}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('The Grimoire has been transcribed to parchment.');
+  markExported();
+}
+
+function copyExport() {
+  const json = JSON.stringify({ sessions: STATE.sessions }, null, 2);
+  navigator.clipboard.writeText(json).then(()=>toast('Copied to the arcane clipboard.')).catch(()=>toast('The clipboard resisted. Try the export button instead.'));
+}
+
+function triggerImport() { document.getElementById('import-file').click(); }
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.sessions) throw new Error('Invalid format');
+      const merge = confirm(`Import ${data.sessions.length} sessions? Choose OK to merge (add to existing), Cancel to replace all.`);
+      if (merge) {
+        const existing = new Set(STATE.sessions.map(s=>s.id));
+        data.sessions.filter(s=>!existing.has(s.id)).forEach(s=>STATE.sessions.push(s));
+      } else {
+        STATE.sessions = data.sessions;
+      }
+      // Merge any new players
+      data.sessions.forEach(s=>s.players.forEach(p=>{
+        if (!STATE.players.find(x=>x.initial===p.initial))
+          STATE.players.push({initial:p.initial,name:p.initial,hidden:false});
+      }));
+      STATE.sessions.sort((a,b)=>a.date.localeCompare(b.date));
+      saveData(STATE);
+      renderHistory();
+      updateNavCount();
+      toast(`Imported. The Grimoire grows heavier.`);
+    } catch { toast('That parchment could not be read. Invalid format.'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+function clearAllData() {
+  if (!confirm('ERASE ALL RECORDS? This cannot be undone. Even Strahd would consider this drastic.')) return;
+  STATE = defaultData();
+  saveData(STATE);
+  renderHistory();
+  updateNavCount();
+  toast('The Grimoire is empty. A blank page. How terrifying.');
+}
+
+// ══════════════════════════════════════════════════
+// CHART HELPERS
+// ══════════════════════════════════════════════════
+function chartOptions() {
+  return {
+    responsive: true, maintainAspectRatio: true,
+    plugins: {
+      legend: { labels: { color:'#8a7250', font:{ family:"'Share Tech Mono', monospace", size:11 } } }
+    },
+    scales: {
+      x: { ticks:{ color:'#8a7250', font:{family:"'Share Tech Mono'",size:10} }, grid:{ color:'rgba(90,66,40,0.3)' }, border:{color:'#3a2e1e'} },
+      y: { ticks:{ color:'#8a7250', font:{family:"'Share Tech Mono'",size:10} }, grid:{ color:'rgba(90,66,40,0.3)' }, border:{color:'#3a2e1e'} }
+    }
+  };
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3500);
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+updateNavCount();
+renderEntry();
+checkRecovery();
+checkExportNudge();
+</script>
+</body>
+</html>
