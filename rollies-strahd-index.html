@@ -491,6 +491,50 @@ function saveData(d) {
   writeBackup(d);
 }
 
+// ── Repo-as-source-of-truth ─────────────────────────────────────
+// Served from the Grimoire's GitHub repo, the app fetches the committed
+// JSON as the durable baseline, merging newer local sessions on top
+// (union by id — the mists never devour what was already written).
+const REPO_DATA_URL = 'rollies-strahd-data.json';
+
+function mergeById(baseSessions, overSessions) {
+  const map = new Map();
+  const weight = s => (s.players ? s.players.reduce((a,p)=>a+((p.round1||[]).length+(p.round2||[]).length),0) : 0);
+  (baseSessions||[]).forEach(s => { if (s && s.id!=null) map.set(String(s.id), s); });
+  (overSessions||[]).forEach(s => {
+    if (!s || s.id==null) return;
+    const k = String(s.id), cur = map.get(k);
+    if (!cur) { map.set(k, s); return; }
+    const wNew = weight(s), wCur = weight(cur);
+    if (wNew > wCur) { map.set(k, s); return; }
+    if (wNew === wCur) {
+      const tNew = Date.parse(s.created||'')||0, tCur = Date.parse(cur.created||'')||0;
+      if (tNew >= tCur) map.set(k, s);
+    }
+  });
+  return [...map.values()].sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
+}
+
+async function hydrateFromRepo() {
+  let repo;
+  try {
+    const resp = await fetch(REPO_DATA_URL, { cache:'no-store' });
+    if (!resp.ok) return false;
+    repo = await resp.json();
+  } catch(e) { return false; }
+  if (!repo || !Array.isArray(repo.sessions)) return false;
+  const before = STATE.sessions.length;
+  STATE.sessions = mergeById(repo.sessions, STATE.sessions);
+  if (repo.players && (!STATE.players || !STATE.players.length)) STATE.players = repo.players;
+  saveData(STATE);
+  const added = STATE.sessions.length - before;
+  if (added > 0) toast(`The Grimoire drew ${repo.sessions.length} sessions from the repository${added?` (+${added} unseen here)`:''}.`);
+  updateNavCount();
+  const activeTab = document.querySelector('.tab-btn.active');
+  if (activeTab) activeTab.click();
+  return true;
+}
+
 let STATE = loadData();
 
 // Recovery: if the Grimoire opens with no sessions but a backup survived, offer it.
@@ -541,11 +585,13 @@ function doRecover() {
   updateNavCount();
   renderEntry();
   toast('The mists yield. Your records return from the dark.');
+  hydrateFromRepo();
 }
 function dismissRecovery() {
   pendingRecovery = null;
   document.getElementById('recovery-banner').style.display = 'none';
   toast('A blank page. The backup remains, should you reconsider (reload to summon it).');
+  hydrateFromRepo();
 }
 
 function sessionsSinceExport() {
@@ -1807,6 +1853,7 @@ updateNavCount();
 renderEntry();
 checkRecovery();
 checkExportNudge();
+if (!pendingRecovery) hydrateFromRepo();
 </script>
 </body>
 </html>
